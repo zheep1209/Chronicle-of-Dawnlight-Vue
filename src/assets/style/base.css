@@ -1,0 +1,70 @@
+/* Reset default margin and padding */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Ensure the html and body take full height */
+html, body {
+    height: 100%;
+    width: 100%;
+    font-family: Arial, sans-serif; /* 或其他你喜欢的字体 */
+    line-height: 1.6;
+}
+
+/* Remove bullet points and other default styles from lists */
+ul, ol {
+    list-style: none;
+}
+
+/* Anchor tags reset */
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+/* Image reset */
+img {
+    max-width: 100%;
+    display: block;
+}
+
+/* Button reset */
+button {
+    border: none;
+    background: none;
+    cursor: pointer;
+}
+
+/* Table reset */
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+/* Remove default input and button styles */
+input, button, textarea {
+    font-family: inherit;
+    font-size: 100%;
+    color: inherit;
+    background-color: transparent;
+    border: none;
+    outline: none;
+    padding: 0;
+}
+
+/* Prevent scrollbars on overflow */
+html {
+    overflow: hidden;
+}
+
+/* Optional: Hide scrollbar but allow scroll */
+body {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+
+body::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+}
