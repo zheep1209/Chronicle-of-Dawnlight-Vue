@@ -1,0 +1,53 @@
+.register {
+  box-sizing: border-box;
+  padding: 50px 50px 50px 0;
+}
+label{
+  .title{
+    text-align: center;
+    font-size: 25px;
+    padding-bottom: 50px;
+  }
+  .input-item{
+    position: relative;
+    display: flex;
+    padding-bottom: 30px;
+    span{
+      box-sizing: border-box;
+      padding-right: 20px;
+      color: rgba(0, 0, 0, 0.65);
+      font-size: 14px;
+    }
+    input{
+      width: 70%;
+      border-bottom: 1px #ea3081 solid;
+    }
+    .getCode{
+      position: absolute;
+      right: 20px;
+      color: #ea3081;
+    }
+  }
+  .button-group{
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    button{
+      width: 100px;
+      height: 34px;
+      border-radius: 17px;
+      background-color: #ff82ba;
+      color: white;
+    }
+    button:nth-child(2){
+      box-sizing: border-box;
+      border: 1px #a7a7a7 solid;
+      background-color: #fff;
+      color: #a7a7a7;
+    }
+  }
+}
+@media (max-width: 600px) {
+.register{
+  padding: 50px!important;
+}}

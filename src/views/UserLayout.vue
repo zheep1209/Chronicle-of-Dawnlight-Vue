@@ -1,10 +1,11 @@
 <script setup>
-import { onMounted, ref } from "vue";
+import { onMounted, ref, watch } from "vue";
 import { getUser } from "@/API/Tools.js";
 import router from "@/router/index.js";
 import UserInfoCard from "@/components/UserInfoCard.vue";
 
 let userData = ref({}); // 初始化为一个空对象
+let activeIndex = ref("/article"); // 初始化默认值
 
 onMounted(async () => {
   if (!localStorage.getItem("token")) {
@@ -12,7 +13,7 @@ onMounted(async () => {
   } else {
     try {
       const result = await getUser();
-      if (result.code === 0) {
+      if (result.code !== 1) {
         localStorage.clear("token");
         await router.push('/login');
       }
@@ -22,6 +23,11 @@ onMounted(async () => {
     }
   }
 });
+
+// 监听路由变化，更新 activeIndex
+watch(() => router.currentRoute.value.path, (newPath) => {
+  activeIndex.value = newPath;
+}, { immediate: true });
 </script>
 
 <template>
@@ -30,25 +36,57 @@ onMounted(async () => {
       <h3>Alba Log</h3>
       <div class="userCard"><UserInfoCard :user-data="userData"></UserInfoCard></div>
       <el-menu
+          :router="true"
           style="width: 220px;background-color: #fffffa;border: none;"
           :default-active="activeIndex"
           mode="horizontal">
-        <el-menu-item index="1">
+        <el-menu-item index="/article">
           <template #title>文章</template>
         </el-menu-item>
-        <el-menu-item index="2">
+        <el-menu-item index="/bill">
           <template #title>账单</template>
         </el-menu-item>
       </el-menu>
     </div>
-    <slot></slot>
+    <router-view v-slot="{ Component }">
+      <transition :name="router.currentRoute.value.path === '/bill' ? 'slide-right' : 'slide-left'" mode="out-in">
+        <component :is="Component" />
+      </transition>
+    </router-view>
   </div>
 </template>
 
 <style lang="scss" scoped>
+.slide-left-enter-active,
+.slide-left-leave-active,
+.slide-right-enter-active,
+.slide-right-leave-active {
+  transition: all 0.5s ease;
+}
+
+.slide-left-enter-from,
+.slide-right-leave-to {
+  transform: translateX(-100%);
+  opacity: 0;
+}
+
+.slide-left-leave-to,
+.slide-right-enter-from {
+  transform: translateX(100%);
+  opacity: 0;
+}
+
+.slide-left-enter-to,
+.slide-left-leave-from,
+.slide-right-enter-to,
+.slide-right-leave-from {
+  transform: translateX(0);
+  opacity: 1;
+}
+
 .home {
   height: 100vh;
-  .tarBar{
+  .tarBar {
     background-color: #fffffa;
     display: flex;
     align-items: center;
@@ -57,13 +95,13 @@ onMounted(async () => {
     position: relative;
     box-shadow: 0 0 10px 1px #e5e5e5;
     justify-content: center;
-    h3{
+    h3 {
       position: absolute;
       top: 10px;
       left: 20px;
-      letter-spacing: 5px
+      letter-spacing: 5px;
     }
-    .userCard{
+    .userCard {
       position: absolute;
       top: 20px;
       right: 20px;

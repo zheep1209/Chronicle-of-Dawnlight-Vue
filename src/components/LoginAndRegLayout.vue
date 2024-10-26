@@ -1,13 +1,12 @@
 <script setup>
 
 </script>
-
 <template>
   <div class="home">
     <div class="background">
       <div class="card">
         <div class="img">
-          <img src="https://img.picgo.net/2024/10/24/98765962_p0a1f5dbcb7fbf320d.jpg" alt="" >
+          <img src="https://img.picgo.net/2024/10/26/98765962_p0aec380ca1a79c131.png" alt="" >
         </div>
         <div class="content">
           <slot></slot>
@@ -18,9 +17,10 @@
 </template>
 
 <style scoped lang="scss">
-$bg-image: url('https://img.picgo.net/2024/10/24/f78607cf03042a307616296bf065ea3b80aa64710b6ddf67.jpg');
+$bg-image: url('https://img.picgo.net/2024/10/26/f78607cf03042a307616296bf065ea3b80aa64710b6ddf67ed8d40ffd27535b9.jpg');
 $overlay-color: rgba(255, 255, 255, 0.8);
 .home{
+  background-color: #fff;
   height: 100vh;
   overflow: hidden;
   position: relative;
@@ -61,4 +61,13 @@ $overlay-color: rgba(255, 255, 255, 0.8);
       }
     }
   }}
+@media (max-width: 600px) {
+  .img{
+    display: none;
+  }
+  .content{
+    width: 100% !important;
+  }
+
+}
 </style>

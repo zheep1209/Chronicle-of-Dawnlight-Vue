@@ -1,4 +1,19 @@
 <script setup>
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
+
+const login = () => {
+  if (!localStorage.getItem("token")) {
+    router.push('/login');
+  } else {
+    router.push('/article');
+  }
+};
+
+const register = () => {
+  router.push('/register');
+};
 </script>
 
 <template>
@@ -14,8 +29,8 @@
 
         <!-- 两个按钮 -->
         <div class="button-group">
-          <button class="btn" @click="this.$router.push('/register');">注册账号</button>
-          <button class="btn" @click="this.$router.push('/login');">立即启程</button>
+          <button class="btn" @click="register">注册账号</button>
+          <button class="btn" @click="login">立即启程</button>
         </div>
       </div>
     </div>
@@ -23,7 +38,7 @@
 </template>
 
 <style lang="scss" scoped>
-$bg-image: url('https://img.picgo.net/2024/10/24/112421150_p0f8ca35882c582d85.jpg');
+$bg-image: url('https://img.picgo.net/2024/10/26/-5384882fb6bac38c.jpg');
 $overlay-color: rgba(0, 0, 0, 0.5);
 
 .home {

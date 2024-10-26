@@ -1,38 +1,87 @@
 <script setup>
-// 获取邮箱验证码
-import {getCode} from "@/API/Tools.js";
-import {ElMessage} from "element-plus";
+import { getCode } from "@/API/Tools.js";
+import { ElMessage } from "element-plus";
+import { ref, computed } from "vue";
+
 const props = defineProps({
   email: {
     type: String,
     required: true
   }
 });
-const getEmailCode = async ()=>{
-  const result =await getCode({email : props.email})
-  console.log(result)
-  if (result.code === 0){
+
+const canGetCode = ref(true);
+const countdown = ref(0);
+const isFetching = ref(false);
+
+const getEmailCode = async () => {
+  if (!canGetCode.value || isFetching.value) return;
+
+  canGetCode.value = false;
+  isFetching.value = true;
+  countdown.value = 30;
+
+  try {
+    const result = await getCode({ email: props.email });
+    console.log(result);
+
+    if (result.code === 0) {
+      ElMessage({
+        message: result.msg,
+        type: 'error'
+      });
+    } else {
+      ElMessage({
+        message: "发送成功",
+        type: 'success'
+      });
+
+      const timer = setInterval(() => {
+        countdown.value--;
+        if (countdown.value <= 0) {
+          clearInterval(timer);
+          canGetCode.value = true;
+        }
+      }, 1000);
+    }
+  } catch (error) {
     ElMessage({
-      message:result.msg,
-      type:'error'
-    })
-  }else {
-    ElMessage({
-      message:"发送成功",
-      type:'success'
-    })
+      message: "请求失败",
+      type: 'error'
+    });
+  } finally {
+    isFetching.value = false;
   }
-}
+};
+
+const buttonText = computed(() => {
+  if (isFetching.value) {
+    return "正在获取";
+  } else if (canGetCode.value) {
+    return "获取";
+  } else {
+    return `获取 (${countdown.value}s)`;
+  }
+});
+
+const buttonColor = computed(() => {
+  return canGetCode.value ? "#ea3081" : "#aaa";
+});
+
+const buttonCursor = computed(() => {
+  return canGetCode.value ? "pointer" : "not-allowed";
+});
 </script>
 
 <template>
-  <button class="getCode" type='button' @click="getEmailCode">获取</button>
+  <button class="getCode" type='button' @click="getEmailCode" :disabled="!canGetCode" :style="{ color: buttonColor, cursor: buttonCursor }">
+    {{ buttonText }}
+  </button>
 </template>
 
 <style scoped lang="scss">
-.getCode{
+.getCode {
   position: absolute;
   right: 20px;
-  color: #ea3081;
 }
 </style>

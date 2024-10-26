@@ -4,8 +4,23 @@
     padding: 0;
     box-sizing: border-box;
 }
+html{
+    background-color: #fffffa !important;
+}
+:root{
+    color-scheme: light;
+    --el-color-primary: #ff82ba !important;
+}
+.el-menu-item:hover,.el-menu-item:focus{
+    background-color: #fffffa !important;
+}
 
-/* Ensure the html and body take full height */
+
+
+
+
+/* Ensure
+ the html and body take full height */
 html, body {
     height: 100%;
     width: 100%;

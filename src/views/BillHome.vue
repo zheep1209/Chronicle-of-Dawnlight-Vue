@@ -3,9 +3,11 @@
 </script>
 
 <template>
-  $END$
+<div class="home"></div>
 </template>
 
 <style scoped lang="scss">
-
-</style>
+.home{
+  background-color: #a9d5b1;
+}
+</style>>
