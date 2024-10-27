@@ -1,6 +1,6 @@
 <script setup>
 import {firstParagraph, formattedTime, truncateContent} from '@/assets/script/utils.js'
-import {onMounted, ref, watch} from "vue";
+import {onMounted, ref} from "vue";
 import StarterKit from '@tiptap/starter-kit'
 import {EditorContent, useEditor} from '@tiptap/vue-3'
 import {Color} from '@tiptap/extension-color'
