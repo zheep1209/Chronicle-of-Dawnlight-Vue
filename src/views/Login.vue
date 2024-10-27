@@ -2,11 +2,11 @@
 import '@/assets/style/login&registerStyle.scss'
 import LoginAndRegLayout from "@/components/LoginAndRegLayout.vue";
 import {onMounted, ref} from "vue";
-import {loginByEmail, loginByPass} from "@/API/Tools.js"; // 导入两个登录接口
+import {loginByEmail, loginByPass} from "@/API/UserAPI.js"; // 导入两个登录接口
 import {ElMessage} from "element-plus";
 import GetCodeComponent from "@/components/GetCodeComponent.vue";
-import {createRouter as $router, useRouter} from "vue-router";
-const router = useRouter();
+import router from "@/router/index.js";
+
 const activeName = ref('first')
 onMounted( async ()=>{
   if (localStorage.getItem("token")){
@@ -130,6 +130,9 @@ const commitLogin = async () => {
     }
   }
 }
+const backToHome  = ()=>{
+  router.push("/")
+}
 
 
 </script>
@@ -147,7 +150,7 @@ const commitLogin = async () => {
                                                              type="password"></div>
             <div class="button-group">
               <button type='button' @click="commitLogin">登录</button>
-              <button @click="$router.push('/')">返回</button>
+              <button @click="backToHome">返回</button>
             </div>
           </el-tab-pane>
           <el-tab-pane label="邮箱登录" name="second">
@@ -157,7 +160,7 @@ const commitLogin = async () => {
             </div>
             <div class="button-group">
               <button type='button' @click="commitLogin">登录</button>
-              <button @click="$router.push('/')">返回</button>
+              <button @click="backToHome">返回</button>
             </div>
           </el-tab-pane>
         </el-tabs>
@@ -167,11 +170,18 @@ const commitLogin = async () => {
 </template>
 
 <style lang="scss">
+.el-tabs{
+  height: 200px;
+  display: flex;
+  align-items: center;
+}
+
 .el-tabs__item.is-active, .el-tabs__item:hover{
   color: #ff82ba;
 }
 .el-tabs__active-bar{
   background-color:#ff82ba;
+
 }
 @media (max-width: 600px) {
 

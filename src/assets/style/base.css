@@ -14,7 +14,9 @@ html{
 .el-menu-item:hover,.el-menu-item:focus{
     background-color: #fffffa !important;
 }
-
+.el-overlay.is-message-box .el-overlay-message-box{
+    padding: 0 !important;
+}
 
 
 

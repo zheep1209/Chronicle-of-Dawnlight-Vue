@@ -12,12 +12,22 @@
     "@vitejs/plugin-vue": "^5.1.4",
     "unplugin-auto-import": "^0.18.3",
     "unplugin-vue-components": "^0.27.4",
-    "vite": "^5.4.8"
+    "vite": "^5.4.10"
   },
   "dependencies": {
+    "@tinymce/tinymce-vue": "^5.1.1",
+    "@tiptap/core": "^2.9.1",
+    "@tiptap/extension-color": "^2.9.1",
+    "@tiptap/extension-highlight": "^2.9.1",
+    "@tiptap/extension-list-item": "^2.9.1",
+    "@tiptap/extension-text-align": "^2.9.1",
+    "@tiptap/extension-text-style": "^2.9.1",
+    "@tiptap/starter-kit": "^2.9.1",
+    "@tiptap/vue-3": "^2.9.1",
     "axios": "^1.7.7",
     "element-plus": "^2.8.6",
-    "pinia": "^2.2.4",
+    "element-tiptap": "^2.2.1",
+    "element-tiptap-vue3-fixed": "^1.2.3",
     "vue": "^3.5.12",
     "vue-axios": "^3.5.2",
     "vue-router": "^4.4.5"

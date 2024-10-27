@@ -39,6 +39,11 @@ watch(() => props.userData, (newUserData) => {
 </template>
 
 <style lang="scss" scoped>
+@media (max-width: 800px){
+  .avatarBorder{
+    transform: scale(.7);
+  }
+}
 .avatarBorder {
   width: 75px;
   border-radius: 50%;
@@ -112,5 +117,6 @@ watch(() => props.userData, (newUserData) => {
     transform: translateX(0);
   }
 }
+
 
 </style>

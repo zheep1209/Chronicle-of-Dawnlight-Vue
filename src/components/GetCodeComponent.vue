@@ -1,5 +1,5 @@
 <script setup>
-import { getCode } from "@/API/Tools.js";
+import { getCode } from "@/API/UserAPI.js";
 import { ElMessage } from "element-plus";
 import { ref, computed } from "vue";
 
@@ -30,6 +30,7 @@ const getEmailCode = async () => {
         message: result.msg,
         type: 'error'
       });
+      canGetCode.value = true;
     } else {
       ElMessage({
         message: "发送成功",
@@ -49,6 +50,9 @@ const getEmailCode = async () => {
       message: "请求失败",
       type: 'error'
     });
+    // 重置状态
+    canGetCode.value = true;
+    isFetching.value = false;
   } finally {
     isFetching.value = false;
   }
@@ -74,7 +78,8 @@ const buttonCursor = computed(() => {
 </script>
 
 <template>
-  <button class="getCode" type='button' @click="getEmailCode" :disabled="!canGetCode" :style="{ color: buttonColor, cursor: buttonCursor }">
+  <button class="getCode" type='button' @click="getEmailCode" :disabled="!canGetCode"
+          :style="{ color: buttonColor, cursor: buttonCursor }">
     {{ buttonText }}
   </button>
 </template>

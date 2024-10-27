@@ -1,6 +1,6 @@
 <script setup>
 import { onMounted, ref, watch } from "vue";
-import { getUser } from "@/API/Tools.js";
+import { getUser } from "@/API/UserAPI.js";
 import router from "@/router/index.js";
 import UserInfoCard from "@/components/UserInfoCard.vue";
 
@@ -36,8 +36,9 @@ watch(() => router.currentRoute.value.path, (newPath) => {
       <h3>Alba Log</h3>
       <div class="userCard"><UserInfoCard :user-data="userData"></UserInfoCard></div>
       <el-menu
+          :ellipsis="false"
           :router="true"
-          style="width: 220px;background-color: #fffffa;border: none;"
+          style=";background-color: #fffffa;border: none;"
           :default-active="activeIndex"
           mode="horizontal">
         <el-menu-item index="/article">
@@ -57,6 +58,45 @@ watch(() => router.currentRoute.value.path, (newPath) => {
 </template>
 
 <style lang="scss" scoped>
+
+@media (max-width: 800px){
+  .tarBar{
+    height: 100px !important;
+    .userCard{
+      top: 0 !important;
+      right: 0 !important;
+    }
+    .el-menu{
+      position: absolute;
+      bottom: 0;
+      background-color: #fffffa !important;
+    }
+  }
+}
+.home {
+  height: 100vh;
+  .tarBar {
+    background-color: #fffffa;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 60px;
+    position: relative;
+    box-shadow: 0 0 10px 1px #e5e5e5;
+    justify-content: center;
+    h3 {
+      position: absolute;
+      top: 10px;
+      left: 20px;
+      letter-spacing: 5px;
+    }
+    .userCard {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+    }
+  }
+}
 .slide-left-enter-active,
 .slide-left-leave-active,
 .slide-right-enter-active,
@@ -82,30 +122,5 @@ watch(() => router.currentRoute.value.path, (newPath) => {
 .slide-right-leave-from {
   transform: translateX(0);
   opacity: 1;
-}
-
-.home {
-  height: 100vh;
-  .tarBar {
-    background-color: #fffffa;
-    display: flex;
-    align-items: center;
-    width: 100%;
-    height: 60px;
-    position: relative;
-    box-shadow: 0 0 10px 1px #e5e5e5;
-    justify-content: center;
-    h3 {
-      position: absolute;
-      top: 10px;
-      left: 20px;
-      letter-spacing: 5px;
-    }
-    .userCard {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-    }
-  }
 }
 </style>

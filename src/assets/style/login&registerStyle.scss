@@ -4,9 +4,11 @@
 }
 label{
   .title{
-    text-align: center;
     font-size: 25px;
     padding-bottom: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
   .input-item{
     position: relative;
