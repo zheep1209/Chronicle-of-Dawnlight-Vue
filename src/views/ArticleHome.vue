@@ -1,4 +1,5 @@
 <script setup>
+import {firstParagraph, formattedTime, truncateContent} from '@/assets/script/utils.js'
 import {onMounted, ref, watch} from "vue";
 import StarterKit from '@tiptap/starter-kit'
 import {EditorContent, useEditor} from '@tiptap/vue-3'
@@ -7,14 +8,16 @@ import {ListItem} from '@tiptap/extension-list-item'
 import {TextStyle} from '@tiptap/extension-text-style'
 import Highlight from '@tiptap/extension-highlight'
 import TextAlign from '@tiptap/extension-text-align'
-import {ElMessage, ElMessageBox} from 'element-plus'
-import {listArticles} from "@/API/ArticleAPI.js";
+import {ElMessage} from 'element-plus'
+import {createArticle, getArticle, listArticles, updateArticle} from "@/API/ArticleAPI.js";
 
 let articleList = ref('')
 const html = ref('');
 //业务开始
 onMounted(async () => {
   articleList.value = await listArticles()
+  ArticleID.value =  articleList.value.data[0].id?articleList.value.data[0]:''
+  await selectArticle(ArticleID.value);
   if (articleList.value.code === 0) {
     ElMessage({
       "type": Error,
@@ -23,30 +26,11 @@ onMounted(async () => {
   }
   console.log(articleList.value.data)
 })
-// 截取第一个标签
-const firstParagraph = (content) => {
-  // 使用正则表达式匹配第一个 HTML 标签的内容
-  content.match(/<([a-z][a-z0-9]*)\b[^>]*>(.*?)<\/\1>/i);
-  return match ? match[2].trim() : '';
-}
-// 失焦保存
-const save = () => {
-  const data = ref({
-    title: firstParagraph(html),
-    content: "",
-    isPrivate: true,
-    createdAt: "2024-10-27 15:38:09",
-    updatedAt: "2024-10-27 15:38:09"
-  })
-}
+
 // 先获取该用户全部笔记
 // 如果用户没有笔记，则自动打开默认内容，当用户编辑默认内容触发save，则保存笔记
-
-let isUpdate = false
-const editor = useEditor({
-  content: articleList.value.data ? articleList.value.data.content : `
+const defaultContent = `
 <h1>请输入标题</h1>
-<br>
 <p>请输入内容</p>
 <p></p>
 <p></p>
@@ -62,7 +46,9 @@ const editor = useEditor({
 <p></p>
 <p></p>
 <p></p>
-`,
+`
+let editor = useEditor({
+  content: articleList.value.data ? articleList.value.data[0].content : defaultContent,
   extensions: [
     StarterKit,
     Color.configure({types: [TextStyle.name, ListItem.name]}),
@@ -74,10 +60,88 @@ const editor = useEditor({
   ],
   onUpdate: ({editor}) => {
     html.value = editor.getHTML()
-    isUpdate = true
+    data.value.title = firstParagraph(html.value)
+    data.value.content = html.value
+    // console.log("html:",html.value)
+    // console.log("title",data.value.title)
+    // console.log("content",data.value.content)
   }
 });
+// id
+const ArticleID = ref('')
+// 选择文章
+const selectArticle = async (id) => {
+  console.log(articleList.value)
+  try {
+    const article = await selectById(id);
+    const content = article.content;
 
+    if (editor.value) {
+      editor.value.commands.setContent(content);
+    }
+
+    ArticleID.value = id;
+  } catch (error) {
+    console.error('获取文章内容失败:', error);
+  }
+};
+// id查找文章
+const selectById =async (id)=>{
+  const result = await getArticle(id)
+  if (result.code===1){
+    console.log("文章数据",result)
+    return result.data
+  }
+}
+// 失焦保存
+const data = ref({
+  title: "",
+  content: "",
+  isPrivate: true,
+  createdAt: "",
+  updatedAt: ""
+})
+const save = async () => {
+  if (!ArticleID.value){
+    // 列表无数据，新增
+    if (data.value.content === "") {
+    }
+    else {
+      data.value.updatedAt = formattedTime()
+      data.value.createdAt = formattedTime()
+      console.log(data.value)
+      const result = await createArticle(data.value)
+      articleList.value = await listArticles()
+      // console.log(result)
+      if (result.code !== 1) {
+        ElMessage({
+          message: "保存失败，" + result.msg,
+          type: "error"
+        })
+      }
+    }
+  }else if (ArticleID.value){
+    // 列表有数据，检查ID后编辑
+    // console.log("待提交的数据",data.value)
+    console.log(data.value)
+    const result = await updateArticle(ArticleID.value,data.value)
+    // console.log(result)
+    articleList.value = await listArticles()
+    if (result.code !== 1) {
+      ElMessage({
+        message: "保存失败，" + result.msg,
+        type: "error"
+      })
+    }
+  }
+}
+// 新建笔记
+const add=()=>{
+  ArticleID.value = '';
+  if (editor.value) {
+    editor.value.commands.setContent(defaultContent);
+  }
+}
 </script>
 
 
@@ -93,29 +157,35 @@ const editor = useEditor({
           <div v-if="articleList" class="sum">共{{ articleList.data.length }}项</div>
           <div class="button-group">
             <div class="more-select">多选</div>
-            <div class="add">new</div>
+            <div class="add" @click="add">new</div>
           </div>
         </div>
       </div>
       <div class="list">
         <el-scrollbar height="74vh">
-          <div v-if="!articleList.data[0]" class="tips">你还没有笔记哦</div>
-          <div v-for="item in articleList.data" class="item">
+          <div v-if="!articleList.data" class="tips">你还没有笔记哦</div>
+          <div @click="selectArticle(item.id)" v-for="item in articleList.data" class="item">
             <div class="title">{{ item.title }}</div>
-            <div class="content">{{ item.content }}</div>
+            <div class="content">{{ truncateContent(item.content) }}</div>
             <div class="info">
-              <div class="icon">O</div>
-              <div class="time">时间</div>
+              <div class="icon">{{item.isPrivate?"私密":"公开"}}</div>
+              <div class="time">{{item.updatedAt}}</div>
               <div class="label">分类</div>
             </div>
           </div>
         </el-scrollbar>
       </div>
     </div>
-    <div class="edit" @blur="save">
+    <div class="edit" @focusout="save">
       <div v-if="editor" class="container">
         <div class="control-group">
           <div class="button-group">
+            <el-switch
+                v-model="data.isPrivate"
+                active-text="私密"
+                inactive-text="公开"
+                size="small"
+            />
             <button :disabled="!editor.can().chain().focus().undo().run()" @click="editor.chain().focus().undo().run()">
               撤销
             </button>

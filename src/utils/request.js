@@ -72,11 +72,11 @@ instance.interceptors.response.use(
         } else if (error.request) {
             // 请求已发出，但没有收到响应
             console.log('请求超时或网络错误');
-            handleUnauthorized();
+            // handleUnauthorized();
         } else {
             // 发生在设置请求时的错误
             console.log('请求设置错误');
-            handleUnauthorized();
+            // handleUnauthorized();
         }
         return Promise.reject(error);
     }
