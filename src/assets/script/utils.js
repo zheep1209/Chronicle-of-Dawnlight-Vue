@@ -12,13 +12,25 @@ export const formattedTime = () => {
 export const firstParagraph = (content) => {
     // 使用正则表达式匹配第一个 HTML 标签的内容
     const match = content.match(/<([a-z][a-z0-9]*)\b[^>]*>(.*?)<\/\1>/i);
-    return match ? match[2].trim() : '';
+    if (match) {
+        // 去除标签内的样式
+        const innerContent = match[2].replace(/<[^>]+>/g, '').trim();
+        // 截取前 5 个字符，如果超过 5 个字符则加上 ...
+        return innerContent.length > 10 ? innerContent.slice(0, 10) + '...' : innerContent;
+    }
 }
+
+
 // 去标签预览
 export const truncateContent = (content) => {
-    // 去除 HTML 标签
-    const text = content.replace(/<[^>]+>/g, '');
-    // 截取前7个字符
-    return text.slice(0, 7);
+    // 使用正则表达式匹配并去除第一个 HTML 标签及其内容
+    const contentWithoutFirstTag = content.replace(/<([a-z][a-z0-9]*)\b[^>]*>(.*?)<\/\1>/i, '');
+
+    // 去除剩余内容中的 HTML 标签
+    const text = contentWithoutFirstTag.replace(/<[^>]+>/g, '');
+
+    // 截取前 10 个字符
+    return text.length > 10 ? text.slice(0, 10) + '...' : text;
 }
-export default { formattedTime ,firstParagraph ,truncateContent};
+
+export default {formattedTime, firstParagraph, truncateContent};

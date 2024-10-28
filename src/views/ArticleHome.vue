@@ -1,6 +1,7 @@
 <script setup>
 import {firstParagraph, formattedTime, truncateContent} from '@/assets/script/utils.js'
 import {onMounted, ref} from "vue";
+import { ClickOutside as vClickOutside } from 'element-plus'
 import StarterKit from '@tiptap/starter-kit'
 import {EditorContent, useEditor} from '@tiptap/vue-3'
 import {Color} from '@tiptap/extension-color'
@@ -8,15 +9,24 @@ import {ListItem} from '@tiptap/extension-list-item'
 import {TextStyle} from '@tiptap/extension-text-style'
 import Highlight from '@tiptap/extension-highlight'
 import TextAlign from '@tiptap/extension-text-align'
-import {ElMessage} from 'element-plus'
-import {createArticle, getArticle, listArticles, updateArticle} from "@/API/ArticleAPI.js";
+import {ElMessage, ElMessageBox} from 'element-plus'
+import {
+  createArticle,
+  deleteArticle,
+  getArticle,
+  getArticleByCategoryId,
+  listArticles,
+  updateArticle, updateCategoryByIds
+} from "@/API/ArticleAPI.js";
+import {createCategories, getCategoriesList} from "@/API/categoryAPI.js";
 
 let articleList = ref('')
 const html = ref('');
 //业务开始
 onMounted(async () => {
   articleList.value = await listArticles()
-  ArticleID.value =  articleList.value.data[0].id?articleList.value.data[0]:''
+  ArticleID.value = await articleList.value.data[0] ? articleList.value.data[0].id : ''
+  // console.log(ArticleID.value);
   await selectArticle(ArticleID.value);
   if (articleList.value.code === 0) {
     ElMessage({
@@ -24,7 +34,8 @@ onMounted(async () => {
       "message": '获取用户笔记出错，请刷新页面'
     })
   }
-  console.log(articleList.value.data)
+  // 获取全部标签列表
+  await getCategories()
 })
 
 // 先获取该用户全部笔记
@@ -62,34 +73,39 @@ let editor = useEditor({
     html.value = editor.getHTML()
     data.value.title = firstParagraph(html.value)
     data.value.content = html.value
-    // console.log("html:",html.value)
-    // console.log("title",data.value.title)
-    // console.log("content",data.value.content)
   }
 });
-// id
+// 手动调用editor更新
+// 定义 onUpdate 回调
+const handleUpdate = (editor) => {
+  html.value = editor.getHTML();
+  data.value.title = firstParagraph(html.value);
+  data.value.content = html.value;
+  // console.log(html.value);
+};
+// 已选文章的id
 const ArticleID = ref('')
 // 选择文章
 const selectArticle = async (id) => {
   console.log(articleList.value)
+  console.log("打印", id, "end")
   try {
     const article = await selectById(id);
     const content = article.content;
-
     if (editor.value) {
       editor.value.commands.setContent(content);
+      handleUpdate(editor.value)
     }
-
     ArticleID.value = id;
   } catch (error) {
     console.error('获取文章内容失败:', error);
   }
 };
 // id查找文章
-const selectById =async (id)=>{
+const selectById = async (id) => {
   const result = await getArticle(id)
-  if (result.code===1){
-    console.log("文章数据",result)
+  if (result.code === 1) {
+    console.log("文章数据", result)
     return result.data
   }
 }
@@ -102,11 +118,10 @@ const data = ref({
   updatedAt: ""
 })
 const save = async () => {
-  if (!ArticleID.value){
+  if (!ArticleID.value) {
     // 列表无数据，新增
     if (data.value.content === "") {
-    }
-    else {
+    } else {
       data.value.updatedAt = formattedTime()
       data.value.createdAt = formattedTime()
       console.log(data.value)
@@ -120,11 +135,11 @@ const save = async () => {
         })
       }
     }
-  }else if (ArticleID.value){
+  } else if (ArticleID.value) {
     // 列表有数据，检查ID后编辑
     // console.log("待提交的数据",data.value)
     console.log(data.value)
-    const result = await updateArticle(ArticleID.value,data.value)
+    const result = await updateArticle(ArticleID.value, data.value)
     // console.log(result)
     articleList.value = await listArticles()
     if (result.code !== 1) {
@@ -136,43 +151,245 @@ const save = async () => {
   }
 }
 // 新建笔记
-const add=()=>{
+const add = () => {
   ArticleID.value = '';
   if (editor.value) {
     editor.value.commands.setContent(defaultContent);
   }
 }
+// 批量删除
+const deleteArticles = async () => {
+  const result = await deleteArticle(checkedArticles.value);
+  if (result.code === 1) {
+    ElMessage({
+      message: "删除成功",
+      type: "success"
+    })
+    articleList.value = await listArticles()
+  } else {
+    ElMessage({
+      message: "删除失败" + result.msg,
+      type: "error"
+    })
+  }
+}
+// 已选择的文章ID列表
+let checkedArticles = ref([])
+// 多选
+let isMore = ref(false)
+const checkAll = ref(false)
+const isIndeterminate = ref(true)
+const handleCheckAllChange = (val) => {
+  checkedArticles.value = val ? articleList.value.data.map(item => item.id) : []
+  isIndeterminate.value = false
+}
+const handleCheckedCitiesChange = (value) => {
+  const checkedCount = value.length
+  checkAll.value = checkedCount === articleList.value.data.map(item => item.id).length
+  isIndeterminate.value = checkedCount > 0 && checkedCount < articleList.value.data.map(item => item.id).length
+}
+// 当前选择的标签ID
+let currentID = ref('')
+// 获取与给定值匹配的标签
+function getLabelByValue(value) {
+  const matchedOption = options.value.find(option => option.value === value);
+  return matchedOption ? matchedOption.label : null;
+}
+// 标签选择
+let options = ref([
+  {
+    value: 0,
+    label: '全部笔记',
+  }])
+// 获取全部标签
+const getCategories = async () => {
+  const result = await getCategoriesList()
+  if (result.code === 1) {
+    await result.data.forEach((item, index) => {
+      options.value.push({
+        value: 1 + index,
+        label: item.name
+      })
+    })
+    console.log("获取分类:", options.value)
+  } else {
+    ElMessage({
+      message: "获取分类失败" + result.msg,
+      type: "error"
+    })
+  }
+}
+// 添加标签
+const addCategories = () => {
+  ElMessageBox.prompt('请输入分类名', 'Tip', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+  })
+      .then(async ({value}) => {
+        const result = await createCategories({id: '', name: value})
+        if (result.code === 1) {
+          ElMessage({
+            type: 'success',
+            message: `成功添加:${value}标签`,
+          })
+          await getCategories()
+        } else {
+          ElMessage({
+            type: 'info',
+            message: '添加错误' + result.msg,
+          })
+        }
+      })
+      .catch(() => {
+
+      })
+}
+// 移动文章/批量修改文章标签
+const popoverRef = ref()
+const moveArticle =async (categoriesId)=>{
+  // console.log("你选择的文章ID",checkedArticles.value)
+  if (checkedArticles.value.length==0){
+    ElMessage({
+      message: "你还没有选择文章",
+      type: "error"
+    })
+    return;
+  }
+  // 业务！启动！
+  const result = await updateCategoryByIds(checkedArticles.value,categoriesId)
+  if (result.code === 1) {
+    ElMessage({
+      message: "移动成功",
+      type: "success"
+    })
+    articleList.value = await listArticles()
+  } else {
+    ElMessage({
+      message: "移动失败" + result.msg,
+      type: "error"
+    })
+  }
+}
+// 通过分类ID查询当前ID下的文章
+const articleByCategoryId = async () => {
+  if (currentID.value[0] === 0) {
+    //   全部笔记
+    articleList.value = await listArticles()
+    console.log("全部笔记", articleList.value)
+  } else {
+    const result = await getArticleByCategoryId(currentID.value[0])
+    if (result.code === 1) {
+      console.log("获取文章:", result.data)
+      articleList.value.data = result.data
+      console.log("获取文章222:",articleList.value)
+    } else {
+      ElMessage({
+        message: "获取文章失败" + result.msg,
+        type: "error"
+      })
+    }
+  }
+}
 </script>
-
-
 <template>
   <div class="home">
     <div class="preview">
       <div class="border">
         <div class="above">
-          <div class="title">全部笔记</div>
+          <div class="title">
+            <el-cascader v-model="currentID" :options="options" placeholder="全部笔记" style="background-color: #fffffa;"
+                         @change="articleByCategoryId"/>
+            <div @click="addCategories">
+              <svg class="icon" height="25" p-id="4264" t="1730114441421"
+                   version="1.1" viewBox="0 0 1024 1024" width="25" xmlns="http://www.w3.org/2000/svg">
+                <path
+                    d="M703.335746 550.266535l-153.069211 0 0 153.069211-76.535117 0 0-153.069211-153.069211 0 0-76.535117 153.069211 0 0-153.069211 76.535117 0 0 153.069211 153.069211 0L703.335746 550.266535zM511.998977 129.327484c-210.469526 0-382.672516 172.201967-382.672516 382.672516s172.20299 382.672516 382.672516 382.672516c210.469526 0 382.672516-172.201967 382.672516-382.672516S722.469526 129.327484 511.998977 129.327484z"
+                    fill="#8a8a8a" p-id="4265"></path>
+              </svg>
+            </div>
+            <el-popover
+                ref="popoverRef"
+                trigger="click"
+                title="With title"
+                virtual-triggering
+                persistent
+            ></el-popover>
+          </div>
           <div class="icon">图标</div>
         </div>
         <div class="under">
-          <div v-if="articleList" class="sum">共{{ articleList.data.length }}项</div>
+          <div>
+            <div v-if="articleList.value" class="sum">共{{ articleList.data.length }}项</div>
+            <div v-if="isMore">
+              <el-checkbox @change="handleCheckAllChange">
+                全选
+              </el-checkbox>
+            </div>
+          </div>
           <div class="button-group">
-            <div class="more-select">多选</div>
-            <div class="add" @click="add">new</div>
+            <div v-if="isMore">
+              <div class="del" @click="deleteArticles">
+                <svg class="icon" height="20" p-id="5223" t="1730088400772"
+                     version="1.1" viewBox="0 0 1024 1024" width="20" xmlns="http://www.w3.org/2000/svg">
+                  <path
+                      d="M783.72 958.39h-539c-41.75 0-75.72-33.46-75.72-74.6V242.5c0-21.18 17.17-38.36 38.36-38.36s38.36 17.17 38.36 38.36v639.17h537V242.5c0-21.18 17.17-38.36 38.36-38.36s38.36 17.17 38.36 38.36v641.29c0 41.14-33.97 74.6-75.72 74.6z"
+                      fill="#8a8a8a" p-id="5224"></path>
+                  <path
+                      d="M706.01 244.51c-21.19 0-38.36-17.17-38.36-38.36v-63.82H360.79v63.82c0 21.18-17.17 38.36-38.36 38.36-21.19 0-38.36-17.17-38.36-38.36v-65.93c0-41.83 27.11-74.6 61.71-74.6h336.87c34.6 0 61.71 32.77 61.71 74.6v65.93c0.01 21.18-17.16 38.36-38.35 38.36z"
+                      fill="#8a8a8a" p-id="5225"></path>
+                  <path
+                      d="M921.14 256.01H102.86c-21.18 0-38.36-17.17-38.36-38.36s17.17-38.36 38.36-38.36h818.29c21.19 0 38.36 17.17 38.36 38.36s-17.18 38.36-38.37 38.36zM514.22 763.27c-21.19 0-38.36-17.17-38.36-38.36V405.27c0-21.18 17.17-38.36 38.36-38.36 21.19 0 38.36 17.17 38.36 38.36v319.64c0 21.18-17.17 38.36-38.36 38.36zM360.79 699.34c-21.19 0-38.36-17.17-38.36-38.36V469.2c0-21.18 17.17-38.36 38.36-38.36s38.36 17.17 38.36 38.36v191.79c0 21.18-17.17 38.35-38.36 38.35zM667.65 699.34c-21.19 0-38.36-17.17-38.36-38.36V469.2c0-21.18 17.17-38.36 38.36-38.36 21.19 0 38.36 17.17 38.36 38.36v191.79c0 21.18-17.17 38.35-38.36 38.35z"
+                      fill="#8a8a8a" p-id="5226"></path>
+                </svg>
+              </div>
+              <el-popover placement="top" :width="160">
+                <div class="selectCategory" @click="moveArticle(item.value)" v-for="item in options">
+                  {{item.value===0?"不分类":item.label}}
+                </div>
+                <template #reference>
+                  <div class="move" @click="moveArticles">
+                  <svg class="icon" height="20" p-id="5122" t="1730088948026"
+                       version="1.1" viewBox="0 0 1024 1024" width="20" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        d="M535.6544 983.04h-299.008V307.2h376.9344v113.2544a40.96 40.96 0 0 0 40.96 40.96H942.08V675.84h-81.92V542.72H611.0208a80.6912 80.6912 0 0 1-79.36-81.92v-71.68H318.5664v512h217.088z"
+                        fill="#8a8a8a" p-id="5123"></path>
+                    <path
+                        d="M207.6672 753.0496H81.92V40.96h396.1856v122.88a40.96 40.96 0 0 0 40.96 40.96H828.416v199.0656h-81.92V286.72H478.1056a81.92 81.92 0 0 1-81.92-81.92v-81.92H163.84v548.2496h43.8272zM746.496 675.328h81.92V983.04h-81.92z"
+                        fill="#8a8a8a" p-id="5124"></path>
+                    <path d="M633.6512 788.2752h307.6096v81.92H633.6512z" fill="#8a8a8a" p-id="5125"></path>
+                  </svg>
+            </div>
+                </template>
+              </el-popover>
+            </div>
+            <div :style="isMore?'color: white;background-color: #ff82ba;':''" class="more-select"
+                 @click="isMore=!isMore">{{isMore?"取消":"多选"}}
+            </div>
+            <div v-if="!isMore" class="add" @click="add">new</div>
           </div>
         </div>
       </div>
       <div class="list">
-        <el-scrollbar height="74vh">
+        <el-scrollbar height="70vh" max-height="100%">
           <div v-if="!articleList.data" class="tips">你还没有笔记哦</div>
-          <div @click="selectArticle(item.id)" v-for="item in articleList.data" class="item">
-            <div class="title">{{ item.title }}</div>
-            <div class="content">{{ truncateContent(item.content) }}</div>
-            <div class="info">
-              <div class="icon">{{item.isPrivate?"私密":"公开"}}</div>
-              <div class="time">{{item.updatedAt}}</div>
-              <div class="label">分类</div>
+          <el-checkbox-group
+              v-model="checkedArticles"
+              @change="handleCheckedCitiesChange "
+          >
+            <div v-for="item in articleList.data" class="item" @click="selectArticle(item.id)">
+              <el-checkbox v-if="isMore&&articleList.data" :key="item.id" :value="item.id">
+              </el-checkbox>
+              <div class="cardInfo">
+                <div class="title">{{ item.title }}</div>
+                <div class="content">{{ truncateContent(item.content) }}</div>
+                <div class="info">
+                  <div class="icon">{{ item.isPrivate ? "私密" : "公开" }}</div>
+                  <div class="time">{{ item.updatedAt.split('T')[0] }}</div>
+                  <div class="label">{{ item.categoryId === null ? "未分类" : getLabelByValue(item.categoryId) }}</div>
+                </div>
+              </div>
             </div>
-          </div>
+          </el-checkbox-group>
         </el-scrollbar>
       </div>
     </div>
@@ -267,21 +484,23 @@ const add=()=>{
             </button>
           </div>
         </div>
-        <el-scrollbar height="80vh">
+        <el-scrollbar height="70vh" max-height="100%">
           <editor-content :editor="editor"/>
         </el-scrollbar>
       </div>
     </div>
   </div>
+
 </template>
 
 <style lang="scss" scoped>
+
 $text-color: #858585;
 @media (min-width: 800px) {
   .home {
-    height: 100vh;
     box-shadow: 0 0 10px 1px #e5e5e5;
-    margin: 40px;
+    max-height: 85vh;
+    margin: 40px 40px 0 40px;
     background-color: #fffffa;
     border-radius: 20px;
     display: flex;
@@ -291,6 +510,9 @@ $text-color: #858585;
       height: 100%;
       width: 30%;
       border-right: #d2d2d2 1px solid;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
 
       .border {
         padding: 20px;
@@ -305,8 +527,18 @@ $text-color: #858585;
           justify-content: space-between;
 
           .title {
+            color: #a7a7a7;
+            display: flex;
+            gap: 10px;
+            align-items: center;
             font-size: 20px;
             font-weight: 600;
+
+            div {
+              display: flex;
+              justify-content: center;
+              align-items: center;
+            }
           }
 
           .icon {
@@ -326,23 +558,27 @@ $text-color: #858585;
           .button-group {
             display: flex;
             justify-content: space-between;
-            gap: 40px;
 
             div {
               padding: 5px 15px;
               border-radius: 17px;
-              min-width: 50px;
-              text-align: center;
               font-weight: 600;
+              height: 2em;
+              display: flex;
+              justify-content: center;
+              align-items: center;
             }
 
             .more-select {
               background-color: #d7d7d7;
+              min-width: 65px;
             }
 
             .add {
+              margin-left: 10px;
               color: white;
               background-color: #ff82ba;
+              min-width: 65px;
             }
           }
         }
@@ -364,40 +600,52 @@ $text-color: #858585;
           margin: 20px;
           background-color: #eaeaea;
           padding: 10px;
+          display: flex;
+          align-items: center;
 
-          .title {
-            font-weight: 600;
+          .cardInfo {
+            padding: 10px 0;
+
+            .title {
+              height: 20px;
+              font-size: 16px;
+              font-weight: 600;
+            }
+
+            .content {
+              height: 20px;
+              font-size: 16px;
+              color: $text-color;
+            }
+
+            .info {
+
+              display: flex;
+              gap: 10px;
+              color: $text-color;
+              font-size: 14px;
+
+              .icon {
+                display: block;
+              }
+
+              .time {
+                display: block;
+              }
+
+              .label {
+                display: block;
+              }
+
+              .label::before {
+                content: "";
+                background-color: $text-color;
+                padding: 0.5px 0.75px;
+                margin-right: 5px
+              }
+            }
           }
 
-          .content {
-            color: $text-color;
-          }
-
-          .info {
-            display: flex;
-            gap: 10px;
-            color: $text-color;
-            font-size: 14px;
-
-            .icon {
-              display: block;
-            }
-
-            .time {
-              display: block;
-            }
-
-            .label {
-              display: block;
-            }
-
-            .label::before {
-              content: "";
-              background-color: $text-color;
-              padding: 0.5px 0.75px;
-              margin-right: 5px
-            }
-          }
         }
 
         .item:hover {
@@ -408,13 +656,12 @@ $text-color: #858585;
 
     .edit {
       width: 100%;
-      padding: 20px;
+
+      .el-scrollbar {
+        padding: 20px;
+      }
 
       .container {
-        .tiptap {
-          border: none;
-          width: 100%;
-        }
 
         :focus-visible {
           outline: none;
@@ -422,6 +669,8 @@ $text-color: #858585;
 
         .control-group {
           .button-group {
+            padding: 20px;
+            border-bottom: #a7a7a7 1px solid;
             display: flex;
             justify-content: center;
             gap: 20px;
@@ -529,38 +778,49 @@ $text-color: #858585;
           margin: 20px;
           background-color: #eaeaea;
           padding: 10px;
+          display: flex;
+          align-items: center;
 
-          .title {
-            font-weight: 600;
-          }
+          .cardInfo {
+            padding: 10px 0;
 
-          .content {
-            color: $text-color;
-          }
-
-          .info {
-            display: flex;
-            gap: 10px;
-            color: $text-color;
-            font-size: 14px;
-
-            .icon {
-              display: block;
+            .title {
+              height: 20px;
+              font-size: 16px;
+              font-weight: 600;
             }
 
-            .time {
-              display: block;
+            .content {
+              height: 20px;
+              font-size: 16px;
+              color: $text-color;
             }
 
-            .label {
-              display: block;
-            }
+            .info {
 
-            .label::before {
-              content: "";
-              background-color: $text-color;
-              padding: 0.5px 0.75px;
-              margin-right: 5px
+              display: flex;
+              gap: 10px;
+              color: $text-color;
+              font-size: 14px;
+
+              .icon {
+                display: block;
+              }
+
+              .time {
+                display: block;
+              }
+
+              .label {
+                display: block;
+              }
+
+              .label::before {
+                content: "";
+                background-color: $text-color;
+                padding: 0.5px 0.75px;
+                margin-right: 5px
+              }
             }
           }
         }

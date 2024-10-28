@@ -11,8 +11,8 @@ export const updateArticle = (id,data) => {
 }
 // DELETE
 // 根据用户id和文章ID进行权限检查，并删除文章
-export const deleteArticle = (id) => {
-    return del(`/article/delete/${id}`)
+export const deleteArticle = (ids) => {
+    return del(`/article/delete`,ids)
 }
 // GET
 // 根据用户id查找并返回用户的所有文章
@@ -23,4 +23,14 @@ export const listArticles = () => {
 // 根据用户id和文章ID进行权限检查，并返回文章详情
 export const getArticle = (id) => {
     return get(`/article/${id}`)
+}
+// GET
+// 根据用户id和分类ID进行权限检查，并返回文章列表
+export const getArticleByCategoryId = (id) => {
+    return get(`/articlesByCategoryId?categoryId=${id}`)
+}
+//PUT
+// 根据文章ID列表进行批量修改文章分类ID
+export const updateCategoryByIds = (ids,id)=>{
+    return put(`/updateCategoryByIds?ids=${ids}&categoryId=${id}`)
 }

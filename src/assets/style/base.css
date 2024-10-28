@@ -17,8 +17,23 @@ html{
 .el-overlay.is-message-box .el-overlay-message-box{
     padding: 0 !important;
 }
-
-
+.el-cascader, .el-tooltip__trigger, .el-tooltip__trigger, .el-input,.el-input--suffix, .is-focus ,.el-input__wrapper{
+    font-size: 20px;
+    background-color: #fffffa !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+}
+.el-cascader{
+    width: 110px;
+}
+.el-cascader:hover{
+    background-color: #fffffa !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+}
+.el-checkbox__input .is-focus{
+    width: 0 !important;
+}
 
 
 /* Ensure
@@ -73,7 +88,7 @@ input, button, textarea {
 
 /* Prevent scrollbars on overflow */
 html {
-    overflow: hidden;
+    /*overflow: hidden;*/
 }
 
 /* Optional: Hide scrollbar but allow scroll */
