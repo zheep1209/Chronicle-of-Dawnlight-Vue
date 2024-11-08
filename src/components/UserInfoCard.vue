@@ -44,6 +44,7 @@ watch(() => props.userData, (newUserData) => {
     transform: scale(.7);
   }
 }
+
 .avatarBorder {
   width: 75px;
   border-radius: 50%;

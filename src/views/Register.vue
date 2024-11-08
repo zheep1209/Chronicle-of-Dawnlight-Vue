@@ -70,7 +70,7 @@ const commitRegister = async () => {
         message: "注册成功",
         type: "success"
       })
-      this.$router.push('/login')
+      await router.push('/login')
     } else {
       ElMessage({
         message: result.msg,
@@ -96,7 +96,7 @@ const backToHome = () => {
         <span class="input-item"><span>用户名</span><input id="username"
                                                            v-model="registerForm.username" autocomplete="username" placeholder="3~20 字母 数字 '_' 和 '-'"
                                                            type="text"></span>
-        <span class="input-item"><span>密　码</span><input id="password" v-model="registerForm.password"
+        <span class="input-item"><span>密　码</span><input  @keyup.enter="commitRegister" id="password" v-model="registerForm.password"
                                                           autocomplete="current-password" placeholder="6-20" type="password"></span>
         <span class="button-group">
         <button type='button' @click="commitRegister">注册</button>

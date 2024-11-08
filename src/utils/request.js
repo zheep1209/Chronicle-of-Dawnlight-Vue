@@ -27,7 +27,6 @@ instance.interceptors.request.use(config => {
     // console.error('Request Error:', error); // 添加日志信息
     return Promise.reject(error);
 });
-
 // 4、设置响应拦截器；可对响应数据进行处理，如简化数据、处理错误码等
 instance.interceptors.response.use(
     response => {
@@ -50,6 +49,7 @@ instance.interceptors.response.use(
                 case 401:
                     // 处理未授权的情况，例如跳转到登录页面
                     handleUnauthorized();
+                    console.log('401被拦截')
                     break;
                 case 403:
                     // 处理权限不足的情况

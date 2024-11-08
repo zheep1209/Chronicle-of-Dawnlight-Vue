@@ -119,8 +119,8 @@ const commitLogin = async () => {
           message: "登录成功",
           type: "success"
         })
-        localStorage.setItem('token', result.data.token);
-        await router.push('/user')
+        localStorage.setItem('token', result.data.Token);
+        await router.push('/article')
       }else {
         ElMessage({
           message: result.msg,
@@ -140,13 +140,13 @@ const backToHome  = ()=>{
 <template>
   <LoginAndRegLayout>
     <div class="register">
-      <label>
+      <label >
         <span class="title">Dawnlight Log 登录</span>
         <el-tabs v-model="activeName" class="demo-tabs">
           <el-tab-pane label="密码登录" name="first">
-            <div class="input-item"><span>用户名</span><input id="username" v-model="registerForm.username" type="text">
+            <div class="input-item"><span>用户名</span><input @keyup.enter="commitLogin" id="username" v-model="registerForm.username" type="text">
             </div>
-            <div class="input-item"><span>密　码</span><input id="password" v-model="registerForm.password"
+            <div class="input-item"><span>密　码</span><input @keyup.enter="commitLogin" id="password" v-model="registerForm.password"
                                                              type="password"></div>
             <div class="button-group">
               <button type='button' @click="commitLogin">登录</button>
@@ -154,8 +154,8 @@ const backToHome  = ()=>{
             </div>
           </el-tab-pane>
           <el-tab-pane label="邮箱登录" name="second">
-            <div class="input-item"><span>邮　箱</span><input id="email" v-model="registerForm.email" type="text"></div>
-            <div class="input-item"><span>验证码</span><input id="code" v-model="registerForm.code" type="text">
+            <div class="input-item"><span>邮　箱</span><input @keyup.enter="commitLogin" id="email" v-model="registerForm.email" type="text"></div>
+            <div class="input-item"><span>验证码</span><input @keyup.enter="commitLogin" id="code" v-model="registerForm.code" type="text">
               <GetCodeComponent :email="registerForm.email"></GetCodeComponent>
             </div>
             <div class="button-group">

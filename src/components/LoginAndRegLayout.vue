@@ -51,7 +51,7 @@ $overlay-color: rgba(255, 255, 255, 0.8);
       display: flex;
       z-index: 2;
       position: relative;
-      height: 60%;
+      height: 50%;
       img{
         height: 100%;
         transform: scaleX(-1);

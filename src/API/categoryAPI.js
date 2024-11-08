@@ -9,7 +9,7 @@ export const updateCategories = (data) => {
 }
 // id
 export const delCategories = (id) => {
-    return del (`/categories${id}`)
+    return del (`/categories/${id}`)
 }
 export const getCategoriesList = () => {
     return get("/categories")

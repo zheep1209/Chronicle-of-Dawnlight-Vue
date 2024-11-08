@@ -1,7 +1,7 @@
 <script setup>
 import {firstParagraph, formattedTime, truncateContent} from '@/assets/script/utils.js'
 import {onMounted, ref} from "vue";
-import { ClickOutside as vClickOutside } from 'element-plus'
+import {ClickOutside as vClickOutside} from 'element-plus'
 import StarterKit from '@tiptap/starter-kit'
 import {EditorContent, useEditor} from '@tiptap/vue-3'
 import {Color} from '@tiptap/extension-color'
@@ -18,25 +18,40 @@ import {
   listArticles,
   updateArticle, updateCategoryByIds
 } from "@/API/ArticleAPI.js";
-import {createCategories, getCategoriesList} from "@/API/categoryAPI.js";
+import {createCategories, delCategories, getCategoriesList} from "@/API/categoryAPI.js";
 
 let articleList = ref('')
 const html = ref('');
 //业务开始
 onMounted(async () => {
-  articleList.value = await listArticles()
-  ArticleID.value = await articleList.value.data[0] ? articleList.value.data[0].id : ''
-  // console.log(ArticleID.value);
-  await selectArticle(ArticleID.value);
-  if (articleList.value.code === 0) {
+  try {
+    const response = await listArticles();
+    articleList.value = response;
+
+    if (articleList.value && articleList.value.data && articleList.value.data.length > 0) {
+      ArticleID.value = articleList.value.data[0].id;
+      await selectArticle(ArticleID.value);
+    } else {
+      ArticleID.value = '';
+    }
+
+    if (articleList.value && articleList.value.code === 0) {
+      ElMessage({
+        type: 'error',
+        message: '获取用户笔记出错，请刷新页面'
+      });
+    }
+
+    // 获取全部标签列表
+    await getCategories();
+  } catch (error) {
+    console.error('Error in onMounted:', error);
     ElMessage({
-      "type": Error,
-      "message": '获取用户笔记出错，请刷新页面'
-    })
+      type: 'error',
+      message: '发生未知错误，请刷新页面'
+    });
   }
-  // 获取全部标签列表
-  await getCategories()
-})
+});
 
 // 先获取该用户全部笔记
 // 如果用户没有笔记，则自动打开默认内容，当用户编辑默认内容触发save，则保存笔记
@@ -87,8 +102,8 @@ const handleUpdate = (editor) => {
 const ArticleID = ref('')
 // 选择文章
 const selectArticle = async (id) => {
-  console.log(articleList.value)
-  console.log("打印", id, "end")
+  // console.log(articleList.value)
+  // console.log("打印", id, "end")
   try {
     const article = await selectById(id);
     const content = article.content;
@@ -105,7 +120,7 @@ const selectArticle = async (id) => {
 const selectById = async (id) => {
   const result = await getArticle(id)
   if (result.code === 1) {
-    console.log("文章数据", result)
+    // console.log("文章数据", result)
     return result.data
   }
 }
@@ -122,30 +137,30 @@ const save = async () => {
     // 列表无数据，新增
     if (data.value.content === "") {
     } else {
-      data.value.updatedAt = formattedTime()
-      data.value.createdAt = formattedTime()
-      console.log(data.value)
+      // console.log(data.value)
       const result = await createArticle(data.value)
       articleList.value = await listArticles()
-      // console.log(result)
       if (result.code !== 1) {
         ElMessage({
           message: "保存失败，" + result.msg,
           type: "error"
         })
+      } else {
+        ElMessage({
+          message: "已保存",
+          type: "success"
+        })
       }
     }
   } else if (ArticleID.value) {
     // 列表有数据，检查ID后编辑
-    // console.log("待提交的数据",data.value)
-    console.log(data.value)
+    // console.log(data.value)
     const result = await updateArticle(ArticleID.value, data.value)
-    // console.log(result)
     articleList.value = await listArticles()
-    if (result.code !== 1) {
+    if (result.code === 1) {
       ElMessage({
-        message: "保存失败，" + result.msg,
-        type: "error"
+        message: "已保存",
+        type: "success"
       })
     }
   }
@@ -190,11 +205,13 @@ const handleCheckedCitiesChange = (value) => {
 }
 // 当前选择的标签ID
 let currentID = ref('')
+
 // 获取与给定值匹配的标签
 function getLabelByValue(value) {
   const matchedOption = options.value.find(option => option.value === value);
   return matchedOption ? matchedOption.label : null;
 }
+
 // 标签选择
 let options = ref([
   {
@@ -203,15 +220,21 @@ let options = ref([
   }])
 // 获取全部标签
 const getCategories = async () => {
+  options.value = [
+    {
+      value: 0,
+      label: '全部笔记',
+    }]
   const result = await getCategoriesList()
+  // console.log(result)
   if (result.code === 1) {
-    await result.data.forEach((item, index) => {
+    await result.data.forEach((item) => {
       options.value.push({
-        value: 1 + index,
+        value: item.id,
         label: item.name
       })
     })
-    console.log("获取分类:", options.value)
+    // console.log("获取分类:", options.value)
   } else {
     ElMessage({
       message: "获取分类失败" + result.msg,
@@ -246,9 +269,8 @@ const addCategories = () => {
 }
 // 移动文章/批量修改文章标签
 const popoverRef = ref()
-const moveArticle =async (categoriesId)=>{
-  // console.log("你选择的文章ID",checkedArticles.value)
-  if (checkedArticles.value.length==0){
+const moveArticle = async (categoriesId) => {
+  if (checkedArticles.value.length == 0) {
     ElMessage({
       message: "你还没有选择文章",
       type: "error"
@@ -256,7 +278,7 @@ const moveArticle =async (categoriesId)=>{
     return;
   }
   // 业务！启动！
-  const result = await updateCategoryByIds(checkedArticles.value,categoriesId)
+  const result = await updateCategoryByIds(checkedArticles.value, categoriesId)
   if (result.code === 1) {
     ElMessage({
       message: "移动成功",
@@ -273,21 +295,41 @@ const moveArticle =async (categoriesId)=>{
 // 通过分类ID查询当前ID下的文章
 const articleByCategoryId = async () => {
   if (currentID.value[0] === 0) {
-    //   全部笔记
+    //全部笔记
     articleList.value = await listArticles()
-    console.log("全部笔记", articleList.value)
   } else {
     const result = await getArticleByCategoryId(currentID.value[0])
     if (result.code === 1) {
-      console.log("获取文章:", result.data)
       articleList.value.data = result.data
-      console.log("获取文章222:",articleList.value)
     } else {
       ElMessage({
         message: "获取文章失败" + result.msg,
         type: "error"
       })
     }
+  }
+}
+// 删除标签
+const delCategory = async (id) => {
+  console.log(id)
+  const result = await delCategories(id)
+  console.log(result)
+  if (result.code === 1) {
+    ElMessage({
+      message: "已删除",
+      type: "success"
+    })
+    options.value = [
+      {
+        value: 0,
+        label: '全部笔记',
+      }]
+    await getCategories();
+  } else {
+    ElMessage({
+      message: "删除失败" + "请将当前在此分类中的文章移出",
+      type: "error"
+    })
   }
 }
 </script>
@@ -297,23 +339,43 @@ const articleByCategoryId = async () => {
       <div class="border">
         <div class="above">
           <div class="title">
-            <el-cascader v-model="currentID" :options="options" placeholder="全部笔记" style="background-color: #fffffa;"
+            <el-cascader v-model="currentID" :options="options" placeholder="全部笔记"
+                         style="background-color: #fffffa;"
                          @change="articleByCategoryId"/>
             <div @click="addCategories">
-              <svg class="icon" height="25" p-id="4264" t="1730114441421"
-                   version="1.1" viewBox="0 0 1024 1024" width="25" xmlns="http://www.w3.org/2000/svg">
+              <svg class="icon" height="25px" p-id="4264" t="1730114441421"
+                   version="1.1" viewBox="0 0 1024 1024" width="25px" xmlns="http://www.w3.org/2000/svg">
                 <path
                     d="M703.335746 550.266535l-153.069211 0 0 153.069211-76.535117 0 0-153.069211-153.069211 0 0-76.535117 153.069211 0 0-153.069211 76.535117 0 0 153.069211 153.069211 0L703.335746 550.266535zM511.998977 129.327484c-210.469526 0-382.672516 172.201967-382.672516 382.672516s172.20299 382.672516 382.672516 382.672516c210.469526 0 382.672516-172.201967 382.672516-382.672516S722.469526 129.327484 511.998977 129.327484z"
                     fill="#8a8a8a" p-id="4265"></path>
               </svg>
             </div>
             <el-popover
-                ref="popoverRef"
-                trigger="click"
-                title="With title"
-                virtual-triggering
-                persistent
-            ></el-popover>
+                :width="200"
+                placement="top"
+                title="请选择要删除的分类"
+                trigger="click">
+              <el-popconfirm
+                  v-for="item in options"
+                  cancel-button-text="No"
+                  confirm-button-text="Yes"
+                  icon-color="#626AEF"
+                  title="你确定要删除它吗?"
+                  @confirm="delCategory(item.value)">
+                <template #reference>
+                  <div class="delItem">{{ item.label === "全部笔记" ? "" : item.label }}</div>
+                </template>
+              </el-popconfirm>
+              <template #reference>
+                <div>
+                  <svg class="icon" height="20" viewBox="0 0 1024 1024" width="20" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        d="M507.904 52.224q95.232 0 179.2 36.352t145.92 98.304 98.304 145.408 36.352 178.688-36.352 179.2-98.304 145.92-145.92 98.304-179.2 36.352-178.688-36.352-145.408-98.304-98.304-145.92-36.352-179.2 36.352-178.688 98.304-145.408 145.408-98.304 178.688-36.352zM736.256 573.44q30.72 0 55.296-15.872t24.576-47.616q0-30.72-24.576-45.568t-55.296-14.848l-452.608 0q-30.72 0-56.32 14.848t-25.6 45.568q0 31.744 25.6 47.616t56.32 15.872l452.608 0z"
+                        fill="#8a8a8a"/>
+                  </svg>
+                </div>
+              </template>
+            </el-popover>
           </div>
           <div class="icon">图标</div>
         </div>
@@ -327,10 +389,10 @@ const articleByCategoryId = async () => {
             </div>
           </div>
           <div class="button-group">
-            <div v-if="isMore">
-              <div class="del" @click="deleteArticles">
-                <svg class="icon" height="20" p-id="5223" t="1730088400772"
-                     version="1.1" viewBox="0 0 1024 1024" width="20" xmlns="http://www.w3.org/2000/svg">
+            <div v-if="isMore" class="more-button">
+              <div class="del">
+                <svg class="icon" height="25" p-id="5223" t="1730088400772"
+                     version="1.1" viewBox="0 0 1024 1024" width="25" xmlns="http://www.w3.org/2000/svg">
                   <path
                       d="M783.72 958.39h-539c-41.75 0-75.72-33.46-75.72-74.6V242.5c0-21.18 17.17-38.36 38.36-38.36s38.36 17.17 38.36 38.36v639.17h537V242.5c0-21.18 17.17-38.36 38.36-38.36s38.36 17.17 38.36 38.36v641.29c0 41.14-33.97 74.6-75.72 74.6z"
                       fill="#8a8a8a" p-id="5224"></path>
@@ -342,40 +404,40 @@ const articleByCategoryId = async () => {
                       fill="#8a8a8a" p-id="5226"></path>
                 </svg>
               </div>
-              <el-popover placement="top" :width="160">
-                <div class="selectCategory" @click="moveArticle(item.value)" v-for="item in options">
-                  {{item.value===0?"不分类":item.label}}
+              <el-popover :width="160" placement="top" title="请选择分类" trigger="click">
+                <div v-for="item in options" class="selectCategory" @click="moveArticle(item.value)">
+                  {{ item.value === 0 ? "不分类" : item.label }}
                 </div>
                 <template #reference>
                   <div class="move" @click="moveArticles">
-                  <svg class="icon" height="20" p-id="5122" t="1730088948026"
-                       version="1.1" viewBox="0 0 1024 1024" width="20" xmlns="http://www.w3.org/2000/svg">
-                    <path
-                        d="M535.6544 983.04h-299.008V307.2h376.9344v113.2544a40.96 40.96 0 0 0 40.96 40.96H942.08V675.84h-81.92V542.72H611.0208a80.6912 80.6912 0 0 1-79.36-81.92v-71.68H318.5664v512h217.088z"
-                        fill="#8a8a8a" p-id="5123"></path>
-                    <path
-                        d="M207.6672 753.0496H81.92V40.96h396.1856v122.88a40.96 40.96 0 0 0 40.96 40.96H828.416v199.0656h-81.92V286.72H478.1056a81.92 81.92 0 0 1-81.92-81.92v-81.92H163.84v548.2496h43.8272zM746.496 675.328h81.92V983.04h-81.92z"
-                        fill="#8a8a8a" p-id="5124"></path>
-                    <path d="M633.6512 788.2752h307.6096v81.92H633.6512z" fill="#8a8a8a" p-id="5125"></path>
-                  </svg>
-            </div>
+                    <svg class="icon" height="20" p-id="5122" t="1730088948026"
+                         version="1.1" viewBox="0 0 1024 1024" width="20" xmlns="http://www.w3.org/2000/svg">
+                      <path
+                          d="M535.6544 983.04h-299.008V307.2h376.9344v113.2544a40.96 40.96 0 0 0 40.96 40.96H942.08V675.84h-81.92V542.72H611.0208a80.6912 80.6912 0 0 1-79.36-81.92v-71.68H318.5664v512h217.088z"
+                          fill="#8a8a8a" p-id="5123"></path>
+                      <path
+                          d="M207.6672 753.0496H81.92V40.96h396.1856v122.88a40.96 40.96 0 0 0 40.96 40.96H828.416v199.0656h-81.92V286.72H478.1056a81.92 81.92 0 0 1-81.92-81.92v-81.92H163.84v548.2496h43.8272zM746.496 675.328h81.92V983.04h-81.92z"
+                          fill="#8a8a8a" p-id="5124"></path>
+                      <path d="M633.6512 788.2752h307.6096v81.92H633.6512z" fill="#8a8a8a" p-id="5125"></path>
+                    </svg>
+                  </div>
                 </template>
               </el-popover>
             </div>
             <div :style="isMore?'color: white;background-color: #ff82ba;':''" class="more-select"
-                 @click="isMore=!isMore">{{isMore?"取消":"多选"}}
+                 @click="isMore=!isMore">{{ isMore ? "取消" : "多选" }}
             </div>
+            <div v-if="!isMore" class="save" @click="save">保存</div>
             <div v-if="!isMore" class="add" @click="add">new</div>
           </div>
         </div>
       </div>
       <div class="list">
-        <el-scrollbar height="70vh" max-height="100%">
+        <el-scrollbar>
           <div v-if="!articleList.data" class="tips">你还没有笔记哦</div>
           <el-checkbox-group
               v-model="checkedArticles"
-              @change="handleCheckedCitiesChange "
-          >
+              @change="handleCheckedCitiesChange">
             <div v-for="item in articleList.data" class="item" @click="selectArticle(item.id)">
               <el-checkbox v-if="isMore&&articleList.data" :key="item.id" :value="item.id">
               </el-checkbox>
@@ -393,7 +455,7 @@ const articleByCategoryId = async () => {
         </el-scrollbar>
       </div>
     </div>
-    <div class="edit" @focusout="save">
+    <div class="edit">
       <div v-if="editor" class="container">
         <div class="control-group">
           <div class="button-group">
@@ -574,6 +636,13 @@ $text-color: #858585;
               min-width: 65px;
             }
 
+            .save {
+              margin-left: 10px;
+              background-color: #ff82ba;
+              min-width: 65px;
+              color: white;
+            }
+
             .add {
               margin-left: 10px;
               color: white;
@@ -587,6 +656,11 @@ $text-color: #858585;
       .list {
         width: 100%;
         height: 100%;
+
+        .el-scrollbar {
+          height: 70vh;
+          max-height: 100%
+        }
 
         .tips {
           padding-top: 20px;
@@ -701,7 +775,6 @@ $text-color: #858585;
 
 @media (max-width: 800px) {
   .home {
-    height: 100vh;
     box-shadow: 0 0 10px 1px #e5e5e5;
     margin: 40px 0;
     background-color: #fffffa;
@@ -710,7 +783,6 @@ $text-color: #858585;
 
     .preview {
       height: 100%;
-
 
       .border {
         padding: 20px;
@@ -727,6 +799,8 @@ $text-color: #858585;
           .title {
             font-size: 20px;
             font-weight: 600;
+            display: flex;
+            align-items: center;
           }
 
           .icon {
@@ -737,7 +811,7 @@ $text-color: #858585;
         .under {
           display: flex;
           justify-content: space-between;
-
+          height: 35px;
           .sum {
             font-size: 14px;
             color: #a7a7a7;
@@ -747,6 +821,11 @@ $text-color: #858585;
             display: flex;
             justify-content: space-between;
             gap: 40px;
+
+            .more-button {
+              display: flex;
+              align-items: center;
+            }
 
             div {
               padding: 5px 15px;
@@ -760,6 +839,13 @@ $text-color: #858585;
               background-color: #d7d7d7;
             }
 
+            .save {
+              margin-left: 10px;
+              background-color: #ff82ba;
+              min-width: 65px;
+              color: white;
+            }
+
             .add {
               color: white;
               background-color: #ff82ba;
@@ -771,6 +857,10 @@ $text-color: #858585;
       .list {
         width: 100%;
         height: 100%;
+
+        .el-scrollbar {
+          height: 75.1vh;
+        }
 
         .item {
           transition: 0.5s;
@@ -829,6 +919,10 @@ $text-color: #858585;
           background-color: #e1e1e1;
         }
       }
+    }
+
+    .edit {
+      display: none;
     }
   }
 }

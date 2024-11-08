@@ -1,6 +1,6 @@
 <script setup>
-import { onMounted, ref, watch } from "vue";
-import { getUser } from "@/API/UserAPI.js";
+import {onMounted, ref, watch} from "vue";
+import {getUser} from "@/API/UserAPI.js";
 import router from "@/router/index.js";
 import UserInfoCard from "@/components/UserInfoCard.vue";
 
@@ -8,7 +8,9 @@ let userData = ref({}); // 初始化为一个空对象
 let activeIndex = ref("/article"); // 初始化默认值
 
 onMounted(async () => {
+  // console.log("token检查",localStorage.getItem("token"))
   if (!localStorage.getItem("token")) {
+    console.log("token存储错误")
     await router.push('/login');
   } else {
     try {
@@ -27,20 +29,22 @@ onMounted(async () => {
 // 监听路由变化，更新 activeIndex
 watch(() => router.currentRoute.value.path, (newPath) => {
   activeIndex.value = newPath;
-}, { immediate: true });
+}, {immediate: true});
 </script>
 
 <template>
   <div class="home">
     <div class="tarBar">
       <h3>Alba Log</h3>
-      <div class="userCard"><UserInfoCard :user-data="userData"></UserInfoCard></div>
+      <div class="userCard">
+        <UserInfoCard :user-data="userData"></UserInfoCard>
+      </div>
       <el-menu
+          :default-active="activeIndex"
           :ellipsis="false"
           :router="true"
-          style=";background-color: #fffffa;border: none;"
-          :default-active="activeIndex"
-          mode="horizontal">
+          mode="horizontal"
+          style=";background-color: #fffffa;border: none;">
         <el-menu-item index="/article">
           <template #title>文章</template>
         </el-menu-item>
@@ -51,7 +55,7 @@ watch(() => router.currentRoute.value.path, (newPath) => {
     </div>
     <router-view v-slot="{ Component }">
       <transition :name="router.currentRoute.value.path === '/bill' ? 'slide-right' : 'slide-left'" mode="out-in">
-        <component :is="Component" />
+        <component :is="Component"/>
       </transition>
     </router-view>
   </div>
@@ -59,22 +63,32 @@ watch(() => router.currentRoute.value.path, (newPath) => {
 
 <style lang="scss" scoped>
 
-@media (max-width: 800px){
-  .tarBar{
+@media (max-width: 800px) {
+  .home {
+    height: auto !important;
+    border-radius: 0 !important;
+    margin-top: 0 !important;
+  }
+
+  .tarBar {
     height: 100px !important;
-    .userCard{
+
+    .userCard {
       top: 0 !important;
       right: 0 !important;
     }
-    .el-menu{
+
+    .el-menu {
       position: absolute;
       bottom: 0;
       background-color: #fffffa !important;
     }
   }
 }
+
 .home {
   height: 100vh;
+
   .tarBar {
     background-color: #fffffa;
     display: flex;
@@ -84,12 +98,14 @@ watch(() => router.currentRoute.value.path, (newPath) => {
     position: relative;
     box-shadow: 0 0 10px 1px #e5e5e5;
     justify-content: center;
+
     h3 {
       position: absolute;
       top: 10px;
       left: 20px;
       letter-spacing: 5px;
     }
+
     .userCard {
       position: absolute;
       top: 20px;
@@ -97,6 +113,7 @@ watch(() => router.currentRoute.value.path, (newPath) => {
     }
   }
 }
+
 .slide-left-enter-active,
 .slide-left-leave-active,
 .slide-right-enter-active,
