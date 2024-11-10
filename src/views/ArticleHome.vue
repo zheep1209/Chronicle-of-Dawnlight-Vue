@@ -124,7 +124,7 @@ const selectById = async (id) => {
     return result.data
   }
 }
-// 失焦保存
+// 保存
 const data = ref({
   title: "",
   content: "",
@@ -146,6 +146,7 @@ const save = async () => {
           type: "error"
         })
       } else {
+        ArticleID.value = result.data
         ElMessage({
           message: "已保存",
           type: "success"
@@ -213,18 +214,18 @@ function getLabelByValue(value) {
 }
 
 // 标签选择
-let options = ref([
-  {
-    value: 0,
-    label: '全部笔记',
-  }])
+let options = ref()
 // 获取全部标签
 const getCategories = async () => {
   options.value = [
     {
       value: 0,
       label: '全部笔记',
-    }]
+    },
+    {
+      value: 1,
+      label: '未分类',
+    },]
   const result = await getCategoriesList()
   // console.log(result)
   if (result.code === 1) {
@@ -297,8 +298,9 @@ const articleByCategoryId = async () => {
   if (currentID.value[0] === 0) {
     //全部笔记
     articleList.value = await listArticles()
-  } else {
-    const result = await getArticleByCategoryId(currentID.value[0])
+  }
+  else {
+    const result = await getArticleByCategoryId(currentID.value[0]===''?'':currentID.value[0])
     if (result.code === 1) {
       articleList.value.data = result.data
     } else {
@@ -390,7 +392,7 @@ const delCategory = async (id) => {
           </div>
           <div class="button-group">
             <div v-if="isMore" class="more-button">
-              <div class="del">
+              <div class="del" @click="deleteArticles">
                 <svg class="icon" height="25" p-id="5223" t="1730088400772"
                      version="1.1" viewBox="0 0 1024 1024" width="25" xmlns="http://www.w3.org/2000/svg">
                   <path
@@ -405,8 +407,8 @@ const delCategory = async (id) => {
                 </svg>
               </div>
               <el-popover :width="160" placement="top" title="请选择分类" trigger="click">
-                <div v-for="item in options" class="selectCategory" @click="moveArticle(item.value)">
-                  {{ item.value === 0 ? "不分类" : item.label }}
+                <div v-for="item in options" class="selectCategory" @click="moveArticle(item.value===0?'':item.value)">
+                  {{ item.value === 0 ? "" : item.label }}
                 </div>
                 <template #reference>
                   <div class="move" @click="moveArticles">
