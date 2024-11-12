@@ -1,5 +1,5 @@
 import { createRouter, createWebHashHistory } from 'vue-router';
-
+import UserCenter from "@/views/UserCenter.vue";
 const router = createRouter({
     history: createWebHashHistory(import.meta.env.BASE_URL),
     routes: [
@@ -32,9 +32,14 @@ const router = createRouter({
                     path: '/bill', // 修改为相对路径
                     name: 'bill',
                     component: () => import('@/views/BillHome.vue')
+                },
+                {
+                    path:'/userCenter',
+                    name:'userCenter',
+                    component:()=>UserCenter
                 }
             ]
-        }
+        },
     ]
 });
 

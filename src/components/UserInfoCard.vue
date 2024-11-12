@@ -1,5 +1,7 @@
 <script setup>
-import {ref,watch} from "vue";
+import {ref, watch} from "vue";
+import router from "@/router/index.js";
+
 const props = defineProps({
   userData: {
     type: Object,
@@ -7,19 +9,28 @@ const props = defineProps({
   }
 });
 const style = ref(computeStyle(props.userData));
+
 function computeStyle(userData) {
   return userData.role === 1 ? "background-color: #2c006b" :
       (userData.role === 2 ? "background-color: #5ec069" :
           (userData.role === 3 ? "background-color: #817e00" : "background:#ff7089"));
 }
+
 watch(() => props.userData, (newUserData) => {
   style.value = computeStyle(newUserData);
-}, { deep: true });
+}, {deep: true});
+const signOut = () => {
+  localStorage.clear("token")
+  router.push("/login")
+}
+const inUserCenter = ()=>{
+  router.push("/userCenter");
+}
 </script>
 
 <template>
   <div class="avatarBorder">
-    <img :src="props.userData.avatar" alt="" class="avatar">
+    <img @click="inUserCenter" :src="props.userData.avatar" alt="" class="avatar">
     <div class="userCard">
       <div class="info">
         <div class="header">
@@ -33,14 +44,15 @@ watch(() => props.userData, (newUserData) => {
           </div>
         </div>
         <div class="email">{{ props.userData.email }}</div>
+        <div class="signOut" @click="signOut">登出</div>
       </div>
     </div>
   </div>
 </template>
 
 <style lang="scss" scoped>
-@media (max-width: 800px){
-  .avatarBorder{
+@media (max-width: 800px) {
+  .avatarBorder {
     transform: scale(.7);
   }
 }
@@ -51,13 +63,15 @@ watch(() => props.userData, (newUserData) => {
   z-index: 2;
   position: relative;
   box-sizing: border-box;
+
   .avatar {
     box-shadow: #a7a7a7 0 0 10px 1px;
-    width:75px;
+    width: 75px;
     border-radius: 50%;
     transition: transform 0.5s ease;
   }
 }
+
 .userCard {
   background-color: #fff;
   transition: 0.3s;
@@ -75,6 +89,7 @@ watch(() => props.userData, (newUserData) => {
   align-items: center;
   box-shadow: #b9b9b9 5px 0 10px 1px;
   border-radius: 10px;
+
   .info {
     padding-right: 30px;
     box-sizing: border-box;
@@ -82,13 +97,16 @@ watch(() => props.userData, (newUserData) => {
     flex-direction: column;
     justify-content: center;
     gap: 10px;
+
     .header {
       display: flex;
       align-items: center;
+
       .name {
         font-size: 20px;
         font-weight: 600;
       }
+
       .role {
         line-height: 90%;
         height: 1.3rem;
@@ -107,13 +125,25 @@ watch(() => props.userData, (newUserData) => {
       font-weight: 100;
       color: #757575;
     }
+
+    .signOut {
+      width: 35px;
+      font-size: 14px;
+      color: white;
+      background-color: #ff82ba;
+      display: inline-block;
+      border-radius: 5px;
+      text-align: center;
+    }
   }
 }
+
 .avatarBorder:hover {
-  .avatar{
+  .avatar {
     transform: rotate(360deg);
   }
-  .userCard{
+
+  .userCard {
     opacity: 1;
     transform: translateX(0);
   }

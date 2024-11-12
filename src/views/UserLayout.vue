@@ -1,6 +1,6 @@
 <script setup>
-import {onMounted, ref, watch} from "vue";
-import {getUser} from "@/API/UserAPI.js";
+import { onMounted, ref, watch } from "vue";
+import { getUser } from "@/API/UserAPI.js";
 import router from "@/router/index.js";
 import UserInfoCard from "@/components/UserInfoCard.vue";
 
@@ -8,9 +8,8 @@ let userData = ref({}); // 初始化为一个空对象
 let activeIndex = ref("/article"); // 初始化默认值
 
 onMounted(async () => {
-  // console.log("token检查",localStorage.getItem("token"))
   if (!localStorage.getItem("token")) {
-    console.log("token存储错误")
+    console.log("token存储错误");
     await router.push('/login');
   } else {
     try {
@@ -18,10 +17,12 @@ onMounted(async () => {
       if (result.code !== 1) {
         localStorage.clear("token");
         await router.push('/login');
+      } else {
+        userData.value = result.data;
       }
-      userData.value = result.data;
     } catch (error) {
       console.error("Error fetching user data:", error);
+      // 可以在这里添加更多的错误处理逻辑
     }
   }
 });
@@ -29,7 +30,7 @@ onMounted(async () => {
 // 监听路由变化，更新 activeIndex
 watch(() => router.currentRoute.value.path, (newPath) => {
   activeIndex.value = newPath;
-}, {immediate: true});
+}, { immediate: true });
 </script>
 
 <template>
@@ -44,7 +45,7 @@ watch(() => router.currentRoute.value.path, (newPath) => {
           :ellipsis="false"
           :router="true"
           mode="horizontal"
-          style=";background-color: #fffffa;border: none;">
+          style="background-color: #fffffa; border: none;">
         <el-menu-item index="/article">
           <template #title>文章</template>
         </el-menu-item>
@@ -53,15 +54,17 @@ watch(() => router.currentRoute.value.path, (newPath) => {
         </el-menu-item>
       </el-menu>
     </div>
-    <router-view v-slot="{ Component }">
-      <transition :name="router.currentRoute.value.path === '/bill' ? 'slide-right' : 'slide-left'" mode="out-in">
-        <component :is="Component"/>
+    <RouterView v-slot="{ Component }" >
+      <transition name="fade">
+        <component :is="Component" />
       </transition>
-    </router-view>
+    </RouterView>
   </div>
 </template>
 
 <style lang="scss" scoped>
+$primary-color: #fffffa;
+$shadow-color: #e5e5e5;
 
 @media (max-width: 800px) {
   .home {
@@ -81,7 +84,7 @@ watch(() => router.currentRoute.value.path, (newPath) => {
     .el-menu {
       position: absolute;
       bottom: 0;
-      background-color: #fffffa !important;
+      background-color: $primary-color !important;
     }
   }
 }
@@ -90,13 +93,13 @@ watch(() => router.currentRoute.value.path, (newPath) => {
   height: 100vh;
 
   .tarBar {
-    background-color: #fffffa;
+    background-color: $primary-color;
     display: flex;
     align-items: center;
     width: 100%;
     height: 60px;
     position: relative;
-    box-shadow: 0 0 10px 1px #e5e5e5;
+    box-shadow: 0 0 10px 1px $shadow-color;
     justify-content: center;
 
     h3 {
@@ -114,30 +117,11 @@ watch(() => router.currentRoute.value.path, (newPath) => {
   }
 }
 
-.slide-left-enter-active,
-.slide-left-leave-active,
-.slide-right-enter-active,
-.slide-right-leave-active {
-  transition: all 0.5s ease;
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.5s; /* 调整过渡时间为0.5秒 */
+}
+.fade-enter, .fade-leave-to /* .fade-leave-active in <2.1.8 */ {
+  opacity: 0; /* 初始状态为透明 */
 }
 
-.slide-left-enter-from,
-.slide-right-leave-to {
-  transform: translateX(-100%);
-  opacity: 0;
-}
-
-.slide-left-leave-to,
-.slide-right-enter-from {
-  transform: translateX(100%);
-  opacity: 0;
-}
-
-.slide-left-enter-to,
-.slide-left-leave-from,
-.slide-right-enter-to,
-.slide-right-leave-from {
-  transform: translateX(0);
-  opacity: 1;
-}
 </style>

@@ -1,7 +1,6 @@
 <script setup>
-import {firstParagraph, formattedTime, truncateContent} from '@/assets/script/utils.js'
+import {firstParagraph, truncateContent} from '@/assets/script/utils.js'
 import {onMounted, ref} from "vue";
-import {ClickOutside as vClickOutside} from 'element-plus'
 import StarterKit from '@tiptap/starter-kit'
 import {EditorContent, useEditor} from '@tiptap/vue-3'
 import {Color} from '@tiptap/extension-color'
@@ -209,6 +208,9 @@ let currentID = ref('')
 
 // 获取与给定值匹配的标签
 function getLabelByValue(value) {
+  if (!options.value) {
+    return null;
+  }
   const matchedOption = options.value.find(option => option.value === value);
   return matchedOption ? matchedOption.label : null;
 }
