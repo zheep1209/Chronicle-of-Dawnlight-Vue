@@ -12,26 +12,35 @@ html{
     --el-color-primary: #ff82ba !important;
 }
 .el-menu-item:hover,.el-menu-item:focus{
-    background-color: #fffffa !important;
+    backdrop-filter: blur(10px) !important;
+    background-color: rgba(255, 255, 255, 0.5) !important;
 }
 .el-overlay.is-message-box .el-overlay-message-box{
     padding: 0 !important;
 }
+.el-menu{
+    background-color: rgba(255, 255, 255, 0) !important;
+}
 /*.is-focus ,*/
 .el-cascader, .el-tooltip__trigger, .el-tooltip__trigger, .el-input,.el-input--suffix, .el-input__wrapper{
     font-size: 20px;
-    background-color: #fffffa !important;
+    color: black !important;
+    background-color: rgba(255, 255, 255, 0) !important;
     box-shadow: none !important;
     padding: 0 !important;
 }
 .el-cascader{
     width: 110px;
 }
+.el-input__inner{
+    color: black !important;
+}
 .el-cascader:hover{
-    background-color: #fffffa !important;
+    background-color: rgba(255, 255, 255, 0) !important;
     box-shadow: none !important;
     padding: 0 !important;
 }
+
 .el-checkbox__input .is-focus{
     width: 0 !important;
 }

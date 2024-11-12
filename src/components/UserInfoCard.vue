@@ -60,11 +60,13 @@ const inUserCenter = ()=>{
 .avatarBorder {
   width: 75px;
   border-radius: 50%;
-  z-index: 2;
   position: relative;
+  z-index: 100;
   box-sizing: border-box;
 
   .avatar {
+    position: relative;
+    z-index: 100;
     box-shadow: #a7a7a7 0 0 10px 1px;
     width: 75px;
     border-radius: 50%;
@@ -75,7 +77,7 @@ const inUserCenter = ()=>{
 .userCard {
   background-color: #fff;
   transition: 0.3s;
-  z-index: -1;
+  z-index: 99;
   opacity: 0;
   transform: translateX(20%);
   position: absolute;
