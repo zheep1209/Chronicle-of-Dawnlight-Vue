@@ -35,11 +35,11 @@ watch(() => router.currentRoute.value.path, (newPath) => {
 
 <template>
   <div class="home">
+    <div class="userCard">
+      <UserInfoCard :user-data="userData"></UserInfoCard>
+    </div>
     <div class="tarBar">
       <h3>Alba Log</h3>
-      <div class="userCard">
-        <UserInfoCard :user-data="userData"></UserInfoCard>
-      </div>
       <el-menu
           :default-active="activeIndex"
           :ellipsis="false"
@@ -60,6 +60,9 @@ watch(() => router.currentRoute.value.path, (newPath) => {
           <component :is="Component"/>
         </transition>
       </RouterView>
+    </div>
+    <div class="bottom">
+        <div><span class="text-block">&copy;2024-2024</span><span>Saigyouji-Zheep</span></div>
     </div>
   </div>
 </template>
@@ -98,7 +101,7 @@ $shadow-color: #e5e5e5;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(255, 255, 255, 0.5); /* 半透明的白色蒙版 */
+  background: rgba(255, 255, 255, 0.4); /* 半透明的白色蒙版 */
   z-index: 0; /* 确保蒙版在背景图之上 */
 }
 .home::after {
@@ -119,6 +122,12 @@ $shadow-color: #e5e5e5;
     position: relative;
     z-index: 2; /* 确保内容在蒙版之上 */
   }
+  .userCard {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 4;
+  }
   .tarBar {
     backdrop-filter: blur(10px); /* 添加背景磨砂效果 */
     background-color: rgba(255, 255, 255, 0.8); /* 半透明的白色背景 */
@@ -136,11 +145,30 @@ $shadow-color: #e5e5e5;
       left: 20px;
       letter-spacing: 5px;
     }
+  }
+  .bottom{
 
-    .userCard {
-      position: absolute;
-      top: 20px;
-      right: 20px;
+    position: relative;
+    padding-top: 20px;
+    height:10vh;
+    text-align: center;
+    span{
+      padding: 10px;
+    }
+    .text-block {
+      color: black;
+      position: relative; /* 确保伪元素相对于 .text-block 定位 */
+    }
+    .text-block::after {
+      content: "";
+      display: block; /* 设置为块级元素 */
+      width: 1px;
+      height: 16px;
+      background-color: #000;
+      position: absolute; /* 相对于 .text-block 定位 */
+      right: 0; /* 伪元素的位置 */
+      top: 50%; /* 垂直居中 */
+      transform: translateY(-50%); /* 垂直居中 */
     }
   }
 }

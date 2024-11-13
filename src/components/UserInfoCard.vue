@@ -132,7 +132,7 @@ const inUserCenter = ()=>{
       width: 35px;
       font-size: 14px;
       color: white;
-      background-color: #ff82ba;
+      background-color: #a52a2a;
       display: inline-block;
       border-radius: 5px;
       text-align: center;
