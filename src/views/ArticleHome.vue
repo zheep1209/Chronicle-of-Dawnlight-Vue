@@ -1,4 +1,5 @@
 <script setup>
+import {} from '/src/assets/script/leaves.js'
 import {firstParagraph, truncateContent} from '@/assets/script/utils.js'
 import {onMounted, ref} from "vue";
 import StarterKit from '@tiptap/starter-kit'
@@ -347,7 +348,6 @@ const delCategory = async (id) => {
           <div class="above">
             <div class="title">
               <el-cascader v-model="currentID" :options="options" placeholder="全部笔记"
-                           style="background-color: #fffffa;"
                            @change="articleByCategoryId"/>
               <div @click="addCategories">
                 <svg class="icon" height="25px" p-id="4264"
@@ -432,7 +432,7 @@ const delCategory = async (id) => {
                   </template>
                 </el-popover>
               </div>
-              <div :style="isMore?'color: white;background-color: #a52a2a;':''" class="more-select"
+              <div :style="isMore?'color: white;background-color: var(--theme-color);':''" class="more-select"
                    @click="isMore=!isMore">{{ isMore ? "取消" : "多选" }}
               </div>
               <div v-if="!isMore" class="save" @click="save">保存</div>
@@ -684,7 +684,7 @@ const delCategory = async (id) => {
 
 <style lang="scss" scoped>
 
-$text-color: #858585;
+$text-color: #380e0e;
 @media (min-width: 800px) {
   .home-a {
     .page-title {
@@ -692,6 +692,7 @@ $text-color: #858585;
       display: flex;
       align-items: center;
       justify-content: center;
+
       .text-block {
         display: inline;
         background-color: #6B3F2D; /* 深棕色背景 */
@@ -714,20 +715,20 @@ $text-color: #858585;
       max-height: 85vh;
       margin: 40px 40px 0 40px;
       display: flex;
-      gap: 30px;
+      gap: 40px;
       //overflow: hidden;
-      border-radius: 20px;
+      //border-radius: 20px;
 
       .preview {
-        border-radius: 20px;
         backdrop-filter: blur(10px); /* 添加背景磨砂效果 */
         background-color: rgba(255, 255, 255, 0.4); /* 半透明的白色背景 */
         position: relative;
         min-width: 300px;
         width: 30%;
+        overflow: hidden;
 
         .border {
-          padding: 20px 20px 0;
+          padding: 20px;
           display: flex;
           flex-direction: column;
 
@@ -758,7 +759,7 @@ $text-color: #858585;
               width: 105px;
               height: 32px;
               line-height: 32px; /* 垂直居中 */
-              background: linear-gradient(135deg, #8b0000, #a52a2a); /* 渐变背景 */
+              background: linear-gradient(135deg, #8b0000, var(--theme-color)); /* 渐变背景 */
               color: #fff;
               font-size: 14px;
               font-weight: bold;
@@ -842,7 +843,7 @@ $text-color: #858585;
 
               .save {
                 margin-left: 10px;
-                background-color: #a52a2a;
+                background-color: var(--theme-color);
                 min-width: 65px;
                 color: white;
               }
@@ -850,7 +851,7 @@ $text-color: #858585;
               .add {
                 margin-left: 10px;
                 color: white;
-                background-color: #a52a2a;
+                background-color: var(--theme-color);
                 min-width: 65px;
               }
             }
@@ -873,10 +874,11 @@ $text-color: #858585;
           }
 
           .item {
+            box-shadow: -5px 0 0 var(--theme-color);
             transition: 0.5s;
             border-radius: 10px;
             margin: 20px;
-            background-color: rgba(255, 255, 255, 0.6);
+            background: linear-gradient(to right, rgba(255, 230, 230, 0.6), rgba(255, 255, 250, 0.6));
             padding: 10px;
             display: flex;
             align-items: center;
@@ -888,15 +890,18 @@ $text-color: #858585;
                 height: 20px;
                 font-size: 16px;
                 font-weight: 600;
+                color: $text-color;
               }
 
               .card-content {
+                font-weight: 100;
                 height: 20px;
                 font-size: 16px;
                 color: $text-color;
               }
 
               .card-info {
+                font-weight: 100;
                 display: flex;
                 gap: 10px;
                 color: $text-color;
@@ -908,17 +913,24 @@ $text-color: #858585;
 
                 .time {
                   display: block;
+                  padding-right: 10px;
+                  position: relative;
                 }
 
                 .label {
                   display: block;
                 }
 
-                .label::before {
+                .time::after {
                   content: "";
+                  display: block; /* 设置为块级元素 */
+                  width: 1px;
+                  height: 16px;
                   background-color: $text-color;
-                  padding: 0.5px 0.75px;
-                  margin-right: 5px
+                  position: absolute; /* 相对于 .text-block 定位 */
+                  right: 0; /* 伪元素的位置 */
+                  top: 50%; /* 垂直居中 */
+                  transform: translateY(-50%); /* 垂直居中 */
                 }
               }
             }
@@ -932,13 +944,14 @@ $text-color: #858585;
       }
 
       .edit {
-        box-shadow: 0 0 10px rgba(0,0,0,0.3);
+        overflow: hidden;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
         max-height: 85vh;
         //border-radius: 20px;
         position: relative;
         //background-color: #fff;
         //backdrop-filter: blur(10px); /* 添加背景磨砂效果 */
-        background-color: rgba(255, 255, 255, 0.8); /* 半透明的白色背景 */
+        background-color: rgba(255, 255, 255, 0.5); /* 半透明的白色背景 */
         width: 100%;
 
         .el-scrollbar {
@@ -946,7 +959,6 @@ $text-color: #858585;
         }
 
         .container {
-
           :focus-visible {
             outline: none;
           }
@@ -969,15 +981,19 @@ $text-color: #858585;
               }
 
               .is-active {
-                border: #a52a2a 1px solid;
+                border: var(--theme-color) 1px solid;
                 color: white;
-                //background-color: #a52a2a;
+                //background-color: var(--theme-color);
               }
 
               button:focus {
                 background-color: #bebebe;
               }
             }
+          }
+
+          .el-scrollbar {
+            padding: 20px 80px 0 80px;
           }
         }
       }
@@ -989,18 +1005,20 @@ $text-color: #858585;
         width: 100%;
         z-index: -1;
       }
+
       .edit:before {
         //background: #fafafa;
-        background-color: rgba(255, 255, 255, 0.8); /* 半透明的白色背景 */
-        box-shadow: 0 0 8px rgba(0,0,0,0.5);
+        background-color: rgba(255, 255, 255, 0.5); /* 半透明的白色背景 */
+        box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
         left: -5px;
         top: 4px;
         transform: rotate(-2.5deg);
       }
+
       .edit:after {
         //background: #f6f6f6;
-        background-color: rgba(255, 255, 255, 0.8); /* 半透明的白色背景 */
-        box-shadow: 0 0 3px rgba(0,0,0,0.5);
+        background-color: rgba(255, 255, 255, 0.5); /* 半透明的白色背景 */
+        box-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
         right: -3px;
         top: 1px;
         transform: rotate(1.4deg);
@@ -1011,6 +1029,7 @@ $text-color: #858585;
 
 @media (max-width: 800px) {
   .home {
+    display: none;
     box-shadow: 0 0 10px 1px #e5e5e5;
     margin: 40px 0;
     background-color: #fffffa;

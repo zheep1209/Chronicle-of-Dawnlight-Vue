@@ -44,7 +44,7 @@ watch(() => router.currentRoute.value.path, (newPath) => {
           :default-active="activeIndex"
           :ellipsis="false"
           :router="true"
-          background-color="background-color: rgba(255, 255, 255, 0.4);"
+          background-color="rgba(255, 255, 255, 0.4)"
           mode="horizontal">
         <el-menu-item index="/article">
           <template #title>文章</template>
@@ -62,7 +62,7 @@ watch(() => router.currentRoute.value.path, (newPath) => {
       </RouterView>
     </div>
     <div class="bottom">
-        <div><span class="text-block">&copy;2024-2024</span><span>Saigyouji-Zheep</span></div>
+      <div><span class="text-block">&copy;2024-2024</span><span>Saigyouji-Zheep</span></div>
     </div>
   </div>
 </template>
@@ -104,6 +104,7 @@ $shadow-color: #e5e5e5;
   background: rgba(255, 255, 255, 0.4); /* 半透明的白色蒙版 */
   z-index: 0; /* 确保蒙版在背景图之上 */
 }
+
 .home::after {
   content: "";
   position: fixed;
@@ -115,6 +116,7 @@ $shadow-color: #e5e5e5;
   background-size: cover; /* 使背景图覆盖整个元素 */
   z-index: -1; /* 确保背景图在所有内容之下 */
 }
+
 .home {
   height: 100vh;
   position: relative; /* 确保伪元素相对于 .home 定位 */
@@ -122,12 +124,14 @@ $shadow-color: #e5e5e5;
     position: relative;
     z-index: 2; /* 确保内容在蒙版之上 */
   }
+
   .userCard {
     position: fixed;
     top: 20px;
     right: 20px;
     z-index: 4;
   }
+
   .tarBar {
     backdrop-filter: blur(10px); /* 添加背景磨砂效果 */
     background-color: rgba(255, 255, 255, 0.8); /* 半透明的白色背景 */
@@ -146,19 +150,22 @@ $shadow-color: #e5e5e5;
       letter-spacing: 5px;
     }
   }
-  .bottom{
 
+  .bottom {
     position: relative;
     padding-top: 20px;
-    height:10vh;
+    height: 10vh;
     text-align: center;
-    span{
+
+    span {
       padding: 10px;
     }
+
     .text-block {
       color: black;
       position: relative; /* 确保伪元素相对于 .text-block 定位 */
     }
+
     .text-block::after {
       content: "";
       display: block; /* 设置为块级元素 */

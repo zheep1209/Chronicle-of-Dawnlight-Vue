@@ -9,7 +9,7 @@ const instance = axios.create({
     baseURL: '/api', // 设置实际的API地址
     timeout: 50000, // 增加超时时间
     headers: {
-        'Content-Type': 'application/json' // 默认设置为JSON
+        'Content-Type': 'application/json' // 默认设置为JSON·
     },
     withCredentials: true // 允许携带凭证
 });

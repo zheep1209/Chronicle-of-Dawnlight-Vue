@@ -1,47 +1,58 @@
-.register {
-  box-sizing: border-box;
-  padding: 50px 50px 50px 0;
+.register{
+  width: 300px;
 }
-label{
-  .title{
+label {
+  width: 300px;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+
+  .title {
     font-size: 25px;
     padding-bottom: 50px;
     display: flex;
     justify-content: center;
     align-items: center;
   }
-  .input-item{
+
+  .input-item {
     position: relative;
     display: flex;
     padding-bottom: 30px;
-    span{
+
+    span {
       box-sizing: border-box;
       padding-right: 20px;
       color: rgba(0, 0, 0, 0.65);
       font-size: 14px;
     }
-    input{
+
+    input {
       width: 70%;
       border-bottom: 1px #ea3081 solid;
     }
-    .getCode{
+
+    .getCode {
       position: absolute;
       right: 20px;
       color: #ea3081;
     }
   }
-  .button-group{
+
+  .button-group {
     width: 100%;
     display: flex;
     justify-content: space-between;
-    button{
+
+    button {
       width: 100px;
       height: 34px;
       border-radius: 17px;
       background-color: #ff82ba;
       color: white;
     }
-    button:nth-child(2){
+
+    button:nth-child(2) {
       box-sizing: border-box;
       border: 1px #a7a7a7 solid;
       background-color: #fff;
@@ -49,7 +60,35 @@ label{
     }
   }
 }
+
 @media (max-width: 600px) {
-.register{
-  padding: 50px!important;
-}}
+  .register {
+    padding: 20px; // 在屏幕较小时减少内边距
+  }
+
+  label {
+    .title {
+      font-size: 20px; // 减小标题字体大小
+      padding-bottom: 30px; // 减少标题下方的间距
+    }
+
+    .input-item {
+      padding-bottom: 20px; // 减少输入项下方的间距
+
+      input {
+        width: 100%; // 输入框宽度调整为100%
+      }
+
+      .getCode {
+        right: 10px; // 减少获取验证码按钮的右侧间距
+      }
+    }
+
+    .button-group {
+      button {
+        width: 80px; // 减少按钮宽度
+        height: 30px; // 减少按钮高度
+      }
+    }
+  }
+}

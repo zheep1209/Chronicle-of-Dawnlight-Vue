@@ -140,9 +140,9 @@ const backToHome  = ()=>{
 <template>
   <LoginAndRegLayout>
     <div class="register">
-      <label >
+      <label>
         <span class="title">Dawnlight Log 登录</span>
-        <el-tabs v-model="activeName" class="demo-tabs">
+        <el-tabs v-model="activeName" class="demo-tabs" style="width: 300px;">
           <el-tab-pane label="密码登录" name="first">
             <div class="input-item"><span>用户名</span><input @keyup.enter="commitLogin" id="username" v-model="registerForm.username" type="text">
             </div>
@@ -171,19 +171,14 @@ const backToHome  = ()=>{
 
 <style lang="scss">
 .el-tabs{
-  height: 200px;
+  //height: 200px;
   display: flex;
   align-items: center;
 }
-
 .el-tabs__item.is-active, .el-tabs__item:hover{
   color: #ff82ba;
 }
 .el-tabs__active-bar{
   background-color:#ff82ba;
-
-}
-@media (max-width: 600px) {
-
 }
 </style>

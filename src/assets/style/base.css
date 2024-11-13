@@ -21,8 +21,12 @@ html{
     background-color: #fffffa !important;
 }
 :root{
+    --theme-color: #a52a2a;
     color-scheme: light;
     --el-color-primary: #a52a2a !important;
+}
+.el-cascader .el-input__inner::placeholder {
+    color: #380e0e;
 }
 .el-menu-item:hover,.el-menu-item:focus{
     backdrop-filter: blur(10px) !important;
