@@ -1,3 +1,16 @@
+@font-face {
+    font-family: 'FZCSJW'; /* 字体名称 */
+    src: url('../font/FZCSJW.TTF') format('truetype'); /* 字体文件路径 */
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'FZCSFW'; /* 字体名称 */
+    src: url('../font/方正粗宋繁体.TTF') format('truetype'); /* 字体文件路径 */
+    font-weight: normal;
+    font-style: normal;
+}
+
 /* Reset default margin and padding */
 * {
     margin: 0;
@@ -9,7 +22,7 @@ html{
 }
 :root{
     color-scheme: light;
-    --el-color-primary: #ff82ba !important;
+    --el-color-primary: #a52a2a !important;
 }
 .el-menu-item:hover,.el-menu-item:focus{
     backdrop-filter: blur(10px) !important;

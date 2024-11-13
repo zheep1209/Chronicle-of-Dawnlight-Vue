@@ -1,0 +1,10 @@
+@font-face {
+    font-family: 'FONT';
+    src: url("FZCSJW.TTF");
+    font-weight: normal;
+    font-style: normal;
+}
+.thin {
+    font-family: 'FONT';
+}
+
