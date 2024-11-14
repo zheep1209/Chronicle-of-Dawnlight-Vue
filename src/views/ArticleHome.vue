@@ -19,6 +19,7 @@ import {
   updateArticle, updateCategoryByIds
 } from "@/API/ArticleAPI.js";
 import {createCategories, delCategories, getCategoriesList} from "@/API/categoryAPI.js";
+import router from "@/router/index.js";
 
 let articleList = ref('')
 const html = ref('');
@@ -384,7 +385,7 @@ const delCategory = async (id) => {
                 </template>
               </el-popover>
             </div>
-            <div class="wenhuatie-button">《文文。新闻》</div>
+            <div class="wenhuatie-button" @click="router.push('/wenwenNews')">《文文。新闻》</div>
           </div>
           <div class="under">
             <div>
