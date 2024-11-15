@@ -16,6 +16,9 @@ const router = createRouter({
             path: '/wenwenNews', // 修改为相对路径
             name: 'wenwenNews', component: () => import('@/views/WenwenNews.vue')
         }, {
+            path: '/qwq/:id', // 修改为相对路径
+            name: 'articleContent', component: () => import('@/views/ArticleContent.vue')
+        }, {
             path: '/bill', // 修改为相对路径
             name: 'bill', component: () => import('@/views/BillHome.vue')
         }, {

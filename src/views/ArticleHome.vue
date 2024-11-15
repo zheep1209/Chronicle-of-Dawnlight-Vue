@@ -19,7 +19,6 @@ import {
   updateArticle, updateCategoryByIds
 } from "@/API/ArticleAPI.js";
 import {createCategories, delCategories, getCategoriesList} from "@/API/categoryAPI.js";
-import router from "@/router/index.js";
 
 let articleList = ref('')
 const html = ref('');
@@ -385,7 +384,7 @@ const delCategory = async (id) => {
                 </template>
               </el-popover>
             </div>
-            <div class="wenhuatie-button" @click="router.push('/wenwenNews')">《文文。新闻》</div>
+            <router-link class="wenhuatie-button" to="/wenwenNews">《文文。新闻》</router-link>
           </div>
           <div class="under">
             <div>
@@ -458,7 +457,7 @@ const delCategory = async (id) => {
                     <div class="time">{{ item.updatedAt.split('T')[0] }}</div>
                     <div class="label">{{
                         item.categoryId === null ? "未分类" : getLabelByValue(item.categoryId)
-                      }}
+                                       }}
                     </div>
                   </div>
                 </div>

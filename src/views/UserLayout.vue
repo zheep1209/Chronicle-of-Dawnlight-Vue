@@ -4,25 +4,31 @@ import {getUser} from "@/API/UserAPI.js";
 import router from "@/router/index.js";
 import UserInfoCard from "@/components/UserInfoCard.vue";
 
-let userData = ref({}); // 初始化为一个空对象
 let activeIndex = ref("/article"); // 初始化默认值
+let userData = ref({}); // 初始化为一个空对象
 
 onMounted(async () => {
   if (!localStorage.getItem("token")) {
     console.log("token存储错误");
     await router.push('/login');
   } else {
-    try {
-      const result = await getUser();
-      if (result.code !== 1) {
-        localStorage.clear("token");
-        await router.push('/login');
-      } else {
-        userData.value = result.data;
+    if (!localStorage.getItem("userData")) {
+      try {
+        const result = await getUser();
+        if (result.code !== 1) {
+          localStorage.removeItem("token");
+          await router.push('/login');
+        } else {
+          console.log(result);
+          userData.value = result.data;
+          localStorage.setItem("userData", JSON.stringify(userData.value));
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        // 可以在这里添加更多的错误处理逻辑
       }
-    } catch (error) {
-      console.error("Error fetching user data:", error);
-      // 可以在这里添加更多的错误处理逻辑
+    } else {
+      userData.value = JSON.parse(localStorage.getItem("userData"));
     }
   }
 });
@@ -71,28 +77,28 @@ watch(() => router.currentRoute.value.path, (newPath) => {
 $primary-color: #fffffa;
 $shadow-color: #e5e5e5;
 
-@media (max-width: 800px) {
-  .home {
-    height: auto !important;
-    border-radius: 0 !important;
-    margin-top: 0 !important;
-  }
-
-  .tarBar {
-    height: 100px !important;
-
-    .userCard {
-      top: 0 !important;
-      right: 0 !important;
-    }
-
-    .el-menu {
-      position: absolute;
-      bottom: 0;
-      background-color: $primary-color !important;
-    }
-  }
-}
+//@media (max-width: 800px) {
+//  .home {
+//    height: auto !important;
+//    border-radius: 0 !important;
+//    margin-top: 0 !important;
+//  }
+//
+//  .tarBar {
+//    height: 100px !important;
+//
+//    .userCard {
+//      top: 0 !important;
+//      right: 0 !important;
+//    }
+//
+//    .el-menu {
+//      position: absolute;
+//      bottom: 0;
+//      //background-color: $primary-color !important;
+//    }
+//  }
+//}
 
 .home::before {
   content: "";
