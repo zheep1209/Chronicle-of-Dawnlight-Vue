@@ -1,11 +1,8 @@
 <script setup>
-const props = defineProps({
-  userData: {
-    type: Object,
-    required: true
-  }
-});
+import useLoginStore from "@/stores/index.js";
 
+const store = useLoginStore()
+const userData = store.getUserData;
 </script>
 
 <template>

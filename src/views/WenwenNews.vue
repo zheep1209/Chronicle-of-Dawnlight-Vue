@@ -48,7 +48,7 @@ const sanitizeContent = (content) => {
       </div>
     </div>
     <div class="page-content">
-      <PageMenu :user-data="userData"></PageMenu>
+      <PageMenu></PageMenu>
       <div class="articles">
         <router-link v-for="(item,index) in articleList.data" :key="index"
                      :style="{ animationDelay: `${index * 0.3}s` }"
@@ -119,7 +119,7 @@ const sanitizeContent = (content) => {
       color: #fff; /* 白色字体 */
       font-size: 35px;
       letter-spacing: 10px;
-      font-family: FZCSJW;
+      font-family: FZCSJW,serif;
       padding: 5px 15px;
       border-radius: 5px; /* 圆角效果 */
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* 轻微阴影 */

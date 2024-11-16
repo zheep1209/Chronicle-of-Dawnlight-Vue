@@ -1,16 +1,3 @@
-<script setup>
-import {useRouter} from 'vue-router';
-
-const router = useRouter();
-const login = () => {
-  router.push('/wenwenNews');
-};
-
-const register = () => {
-  router.push('/register');
-};
-</script>
-
 <template>
   <div class="home">
     <div class="background-overlay">
@@ -21,11 +8,10 @@ const register = () => {
           <h1>曦光录</h1>
           <p>曦光下，梦随晨光</p>
         </div>
-
         <!-- 两个按钮 -->
         <div class="button-group">
-          <button class="btn" @click="register">注册账号</button>
-          <button class="btn" @click="login">立即启程</button>
+          <router-link class="btn" to="/register">注册账号</router-link>
+          <router-link class="btn" to="/wenwenNews">立即启程</router-link>
         </div>
       </div>
     </div>
