@@ -3,15 +3,13 @@ import {onMounted, ref} from "vue";
 import {listPublicArticles} from "@/API/ArticleAPI.js";
 import {ElMessage} from "element-plus";
 import PageMenu from "@/components/PageMenu.vue";
+import useLoginStore from "@/stores/index.js";
 
+const store = useLoginStore()
 let articleList = ref('')
 let userData = ref('')
 onMounted(async () => {
-  if (localStorage.getItem("userData")){
-    userData.value = JSON.parse(localStorage.getItem("userData"));
-  }else {
-    console.error("没获取到")
-  }
+  userData.value = store.getUserData;
   try {
     articleList.value = await listPublicArticles();
     // console.log(articleList.value)
@@ -52,7 +50,8 @@ const sanitizeContent = (content) => {
     <div class="page-content">
       <PageMenu :user-data="userData"></PageMenu>
       <div class="articles">
-        <router-link v-for="(item,index) in articleList.data" :key="index" :style="{ animationDelay: `${index * 0.3}s` }"
+        <router-link v-for="(item,index) in articleList.data" :key="index"
+                     :style="{ animationDelay: `${index * 0.3}s` }"
                      :to="'/qwq/'+item.id"
                      class="article-items">
           <img v-if="(index+1)%2===0" alt="" class="left-img"
@@ -70,7 +69,7 @@ const sanitizeContent = (content) => {
                       d="M96 512h256v160H96zM96 704h256v160H96zM384 512h256v160H384zM384 704h256v160H384zM672 512h256v160H672zM672 704h256v160H672z"
                       fill="#707070" p-id="6525"></path>
                 </svg>
-                2024-11-15
+                {{item.createdAt.split('T')[0]}}
               </div>
               <div>
                 <svg class="icon" height="16" p-id="5410" t="1731633661746"

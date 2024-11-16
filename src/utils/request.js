@@ -3,7 +3,7 @@
 // 1、引入axios
 import axios from 'axios';
 import router from "@/router/index.js";
-
+import useLoginStore from "@/stores/index.js";
 // 2、创建axios实例，在其中设置公共参数
 const instance = axios.create({
     baseURL: '/api', // 设置实际的API地址
@@ -16,7 +16,7 @@ const instance = axios.create({
 // 3、设置请求拦截器；可在发送请求前对请求进行处理，如添加 token 等
 instance.interceptors.request.use(config => {
     // 添加token
-    const token = localStorage.getItem('token');
+    const token = useLoginStore().getToken;
     if (token) {
         config.headers['Authorization'] = token;
     }

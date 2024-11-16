@@ -1,37 +1,26 @@
 <script setup>
 import {onMounted, ref, watch} from "vue";
-import {getUser} from "@/API/UserAPI.js";
 import router from "@/router/index.js";
 import UserInfoCard from "@/components/UserInfoCard.vue";
+import useLoginStore from "@/stores/index.js";
+import {showMessage} from "@/assets/script/utils.js";
+
+const userAgent = navigator.userAgent;
+if (/Mobi|Android/i.test(userAgent)) {
+  showMessage("用电脑吧，我什么都原因做","error")
+  router.push("/");
+}
 
 let activeIndex = ref("/article"); // 初始化默认值
 let userData = ref({}); // 初始化为一个空对象
-
+const store = useLoginStore()
 onMounted(async () => {
-  if (!localStorage.getItem("token")) {
-    console.log("token存储错误");
-    await router.push('/login');
-  } else {
-    if (!localStorage.getItem("userData")) {
-      try {
-        const result = await getUser();
-        if (result.code !== 1) {
-          localStorage.removeItem("token");
-          await router.push('/login');
-        } else {
-          console.log(result);
-          userData.value = result.data;
-          localStorage.setItem("userData", JSON.stringify(userData.value));
-        }
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-        // 可以在这里添加更多的错误处理逻辑
-      }
-    } else {
-      userData.value = JSON.parse(localStorage.getItem("userData"));
-    }
+  if (!store.isLoggedIn) {
+    console.log("未登录")
   }
+    userData.value = store.getUserData
 });
+
 
 // 监听路由变化，更新 activeIndex
 watch(() => router.currentRoute.value.path, (newPath) => {
@@ -74,6 +63,9 @@ watch(() => router.currentRoute.value.path, (newPath) => {
 </template>
 
 <style lang="scss" scoped>
+@media (max-width: 800px){
+
+}
 $primary-color: #fffffa;
 $shadow-color: #e5e5e5;
 

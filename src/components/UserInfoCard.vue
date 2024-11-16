@@ -1,7 +1,8 @@
 <script setup>
 import {ref, watch} from "vue";
 import router from "@/router/index.js";
-
+import useLoginStore from "@/stores/index.js";
+const store = useLoginStore()
 const props = defineProps({
   userData: {
     type: Object,
@@ -20,7 +21,7 @@ watch(() => props.userData, (newUserData) => {
   style.value = computeStyle(newUserData);
 }, {deep: true});
 const signOut = () => {
-  localStorage.clear("token")
+  store.clearSession()
   router.push("/login")
 }
 const inUserCenter = ()=>{
@@ -30,9 +31,9 @@ const inUserCenter = ()=>{
 
 <template>
   <div class="avatarBorder">
-    <img @click="inUserCenter" :src="props.userData.avatar" alt="" class="avatar">
+    <img @click="inUserCenter" :src="props.userData.avatar?props.userData.avatar:''" alt="" class="avatar">
     <div class="userCard">
-      <div class="info">
+      <div class="userCard-info">
         <div class="header">
           <div class="name">{{ props.userData.username }}</div>
           <div :style="style" class="role">
@@ -75,31 +76,28 @@ const inUserCenter = ()=>{
 }
 
 .userCard {
+  box-sizing: initial;
   background-color: #fff;
   transition: 0.3s;
   z-index: 99;
   opacity: 0;
-  transform: translateX(20%);
+  transform: translateX(20%) translateY(-50%);
   position: absolute;
-  top: -17px;
-  left: -160px;
-  max-width: 13em;
+  top: 50%;
+  left: -200px;
   padding: 10px;
-  margin: 15px 15px 15px 15px;
-  box-sizing: border-box;
   display: flex;
   align-items: center;
   box-shadow: #b9b9b9 5px 0 10px 1px;
   border-radius: 10px;
 
-  .info {
-    padding-right: 30px;
+  .userCard-info {
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    gap: 10px;
-
+    gap: 5px;
+    margin-right: 40px;
     .header {
       display: flex;
       align-items: center;
@@ -147,7 +145,7 @@ const inUserCenter = ()=>{
 
   .userCard {
     opacity: 1;
-    transform: translateX(0);
+    transform: translateX(0) translateY(-50%);
   }
 }
 

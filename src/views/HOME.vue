@@ -1,14 +1,9 @@
 <script setup>
-import { useRouter } from 'vue-router';
+import {useRouter} from 'vue-router';
 
 const router = useRouter();
-
 const login = () => {
-  if (!localStorage.getItem("token")) {
-    router.push('/login');
-  } else {
-    router.push('/article');
-  }
+  router.push('/wenwenNews');
 };
 
 const register = () => {

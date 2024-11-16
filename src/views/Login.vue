@@ -6,10 +6,11 @@ import {loginByEmail, loginByPass} from "@/API/UserAPI.js"; // 导入两个登�
 import {ElMessage} from "element-plus";
 import GetCodeComponent from "@/components/GetCodeComponent.vue";
 import router from "@/router/index.js";
-
+import useLoginStore from "@/stores/index.js";
+const store = useLoginStore()
 const activeName = ref('first')
 onMounted( async ()=>{
-  if (localStorage.getItem("token")){
+  if (store.isLoggedIn){
     await router.push('/article')
   }
 })
@@ -101,7 +102,7 @@ const commitLogin = async () => {
           message: "登录成功",
           type: "success"
         })
-        localStorage.setItem('token', result.data.Token);
+        store.setToken(result.data.Token)
         await router.push('/article')
       }else {
         ElMessage({

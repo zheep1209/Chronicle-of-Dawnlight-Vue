@@ -1,6 +1,6 @@
 <script setup>
-import {} from '/src/assets/script/leaves.js'
-import {firstParagraph, truncateContent} from '@/assets/script/utils.js'
+import '/src/assets/script/leaves.js'
+import {firstParagraph, showMessage, truncateContent} from '@/assets/script/utils.js'
 import {onMounted, ref} from "vue";
 import StarterKit from '@tiptap/starter-kit'
 import {EditorContent, useEditor} from '@tiptap/vue-3'
@@ -9,7 +9,7 @@ import {ListItem} from '@tiptap/extension-list-item'
 import {TextStyle} from '@tiptap/extension-text-style'
 import Highlight from '@tiptap/extension-highlight'
 import TextAlign from '@tiptap/extension-text-align'
-import {ElMessage, ElMessageBox} from 'element-plus'
+import {ElMessageBox} from 'element-plus'
 import {
   createArticle,
   deleteArticle,
@@ -35,23 +35,15 @@ onMounted(async () => {
     }
 
     if (articleList.value && articleList.value.code === 0) {
-      ElMessage({
-        type: 'error',
-        message: '获取用户笔记出错，请刷新页面'
-      });
+      showMessage('获取用户笔记出错，请刷新页面', 'error');
     }
 
     // 获取全部标签列表
     await getCategories();
   } catch (error) {
-    console.error('Error in onMounted:', error);
-    ElMessage({
-      type: 'error',
-      message: '发生未知错误，请刷新页面'
-    });
+    showMessage('发生未知错误，请刷新页面', 'error');
   }
 });
-
 // 先获取该用户全部笔记
 // 如果用户没有笔记，则自动打开默认内容，当用户编辑默认内容触发save，则保存笔记
 const defaultContent = `
@@ -81,7 +73,7 @@ let editor = useEditor({
     TextAlign.configure({
       types: ['heading', 'paragraph'],
     }),
-    Highlight,
+    Highlight
   ],
   onUpdate: ({editor}) => {
     html.value = editor.getHTML()
@@ -95,14 +87,11 @@ const handleUpdate = (editor) => {
   html.value = editor.getHTML();
   data.value.title = firstParagraph(html.value);
   data.value.content = html.value;
-  // console.log(html.value);
 };
 // 已选文章的id
 const ArticleID = ref('')
 // 选择文章
 const selectArticle = async (id) => {
-  // console.log(articleList.value)
-  // console.log("打印", id, "end")
   try {
     const article = await selectById(id);
     const content = article.content;
@@ -112,14 +101,13 @@ const selectArticle = async (id) => {
     }
     ArticleID.value = id;
   } catch (error) {
-    console.error('获取文章内容失败:', error);
+    showMessage("获取文章内容失败", "error");
   }
 };
 // id查找文章
 const selectById = async (id) => {
   const result = await getArticle(id)
   if (result.code === 1) {
-    // console.log("文章数据", result)
     return result.data
   }
 }
@@ -136,32 +124,21 @@ const save = async () => {
     // 列表无数据，新增
     if (data.value.content === "") {
     } else {
-      // console.log(data.value)
+
       const result = await createArticle(data.value)
       articleList.value = await listArticles()
       if (result.code !== 1) {
-        ElMessage({
-          message: "保存失败，" + result.msg,
-          type: "error"
-        })
+        showMessage("保存失败，" + result.msg, "error")
       } else {
         ArticleID.value = result.data
-        ElMessage({
-          message: "已保存",
-          type: "success"
-        })
+        showMessage("已保存", "success")
       }
     }
   } else if (ArticleID.value) {
-    // 列表有数据，检查ID后编辑
-    // console.log(data.value)
     const result = await updateArticle(ArticleID.value, data.value)
     articleList.value = await listArticles()
     if (result.code === 1) {
-      ElMessage({
-        message: "已保存",
-        type: "success"
-      })
+      showMessage("已保存", "success")
     }
   }
 }
@@ -176,16 +153,10 @@ const add = () => {
 const deleteArticles = async () => {
   const result = await deleteArticle(checkedArticles.value);
   if (result.code === 1) {
-    ElMessage({
-      message: "删除成功",
-      type: "success"
-    })
+    showMessage("删除成功", "success")
     articleList.value = await listArticles()
   } else {
-    ElMessage({
-      message: "删除失败" + result.msg,
-      type: "error"
-    })
+    showMessage("删除失败" + result.msg, "error")
   }
 }
 // 已选择的文章ID列表
@@ -229,7 +200,6 @@ const getCategories = async () => {
       label: '未分类',
     },]
   const result = await getCategoriesList()
-  // console.log(result)
   if (result.code === 1) {
     await result.data.forEach((item) => {
       options.value.push({
@@ -237,12 +207,8 @@ const getCategories = async () => {
         label: item.name
       })
     })
-    // console.log("获取分类:", options.value)
   } else {
-    ElMessage({
-      message: "获取分类失败" + result.msg,
-      type: "error"
-    })
+    showMessage("获取分类失败: " + result.msg, 'error');
   }
 }
 // 添加标签
@@ -254,16 +220,10 @@ const addCategories = () => {
       .then(async ({value}) => {
         const result = await createCategories({id: '', name: value})
         if (result.code === 1) {
-          ElMessage({
-            type: 'success',
-            message: `成功添加:${value}标签`,
-          })
+          showMessage(`成功添加:${value}标签`, 'success');
           await getCategories()
         } else {
-          ElMessage({
-            type: 'info',
-            message: '添加错误' + result.msg,
-          })
+          showMessage('添加错误' + result.msg, 'info');
         }
       })
       .catch(() => {
@@ -272,26 +232,17 @@ const addCategories = () => {
 }
 // 移动文章/批量修改文章标签
 const moveArticle = async (categoriesId) => {
-  if (checkedArticles.value.length == 0) {
-    ElMessage({
-      message: "你还没有选择文章",
-      type: "error"
-    })
+  if (!checkedArticles.value || checkedArticles.value.length === 0) {
+    showMessage('你还没有选择文章', 'error');
     return;
   }
   // 业务！启动！
   const result = await updateCategoryByIds(checkedArticles.value, categoriesId)
   if (result.code === 1) {
-    ElMessage({
-      message: "移动成功",
-      type: "success"
-    })
+    showMessage('移动成功', 'success');
     articleList.value = await listArticles()
   } else {
-    ElMessage({
-      message: "移动失败" + result.msg,
-      type: "error"
-    })
+    showMessage('移动失败', 'error');
   }
 }
 // 通过分类ID查询当前ID下的文章
@@ -304,23 +255,15 @@ const articleByCategoryId = async () => {
     if (result.code === 1) {
       articleList.value.data = result.data
     } else {
-      ElMessage({
-        message: "获取文章失败" + result.msg,
-        type: "error"
-      })
+      showMessage('获取文章失败', 'error');
     }
   }
 }
 // 删除标签
 const delCategory = async (id) => {
-  console.log(id)
   const result = await delCategories(id)
-  console.log(result)
   if (result.code === 1) {
-    ElMessage({
-      message: "已删除",
-      type: "success"
-    })
+    showMessage('已删除', 'success');
     options.value = [
       {
         value: 0,
@@ -328,10 +271,7 @@ const delCategory = async (id) => {
       }]
     await getCategories();
   } else {
-    ElMessage({
-      message: "删除失败" + "请将当前在此分类中的文章移出",
-      type: "error"
-    })
+    showMessage("删除失败" + "请将当前在此分类中的文章移出", 'error');
   }
 }
 </script>
@@ -432,7 +372,8 @@ const delCategory = async (id) => {
                   </template>
                 </el-popover>
               </div>
-              <div :style="isMore?'color: white;background-color: var(--theme-color);':''" class="more-select"
+              <div :style="isMore?'color: white;background-color: var(--theme-color);':'color:var(--theme-font-color)'"
+                   class="more-select"
                    @click="isMore=!isMore">{{ isMore ? "取消" : "多选" }}
               </div>
               <div v-if="!isMore" class="save" @click="save">保存</div>
@@ -476,7 +417,7 @@ const delCategory = async (id) => {
                   inactive-text="公开"
                   size="small"
               />
-              <!--            撤销-->
+              <!--撤销-->
               <button :disabled="!editor.can().chain().focus().undo().run()"
                       @click="editor.chain().focus().undo().run()">
                 <svg class="icon" height="20" p-id="37677" t="1731410793576"
@@ -486,7 +427,7 @@ const delCategory = async (id) => {
                       fill="#515151" p-id="37678"></path>
                 </svg>
               </button>
-              <!--            返回-->
+              <!--返回-->
               <button :disabled="!editor.can().chain().focus().redo().run()"
                       @click="editor.chain().focus().redo().run()">
                 <svg class="icon" height="20" p-id="37677" style="transform: scaleX(-1);"
@@ -497,7 +438,7 @@ const delCategory = async (id) => {
                 </svg>
 
               </button>
-              <!--            加粗-->
+              <!--加粗-->
               <button :class="{ 'is-active': editor.isActive('bold') }"
                       :disabled="!editor.can().chain().focus().toggleBold().run()"
                       @click="editor.chain().focus().toggleBold().run()">
@@ -508,7 +449,7 @@ const delCategory = async (id) => {
                       fill="#515151" p-id="35432"></path>
                 </svg>
               </button>
-              <!--            斜体-->
+              <!--斜体-->
               <button :class="{ 'is-active': editor.isActive('italic') }"
                       :disabled="!editor.can().chain().focus().toggleItalic().run()"
                       @click="editor.chain().focus().toggleItalic().run()">
@@ -519,7 +460,7 @@ const delCategory = async (id) => {
                       fill="#707070" p-id="34356"></path>
                 </svg>
               </button>
-              <!--            删除线-->
+              <!--删除线-->
               <button :class="{ 'is-active': editor.isActive('strike') }"
                       :disabled="!editor.can().chain().focus().toggleStrike().run()"
                       @click="editor.chain().focus().toggleStrike().run()">
@@ -530,7 +471,31 @@ const delCategory = async (id) => {
                       fill="#707070" p-id="33330"></path>
                 </svg>
               </button>
-              <!--            段落-->
+<!--              列表项-->
+              <button @click="editor.chain().focus().toggleBulletList().run()" :class="{ 'is-active': editor.isActive('bulletList') }">
+                <svg t="1731732366228" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="6561" width="20" height="20"><path d="M917.044 572.14H377.858c-24.816 0-44.932-20.116-44.932-44.932s20.116-44.932 44.932-44.932h539.186c24.816 0 44.932 20.116 44.932 44.932s-20.116 44.932-44.932 44.932z m0-314.525H377.858c-24.816 0-44.932-20.116-44.932-44.932s20.116-44.932 44.932-44.932h539.186c24.816 0 44.932 20.116 44.932 44.932s-20.116 44.932-44.932 44.932zM153.198 931.597c-49.632 0-89.864-40.232-89.864-89.864s40.232-89.864 89.864-89.864 89.864 40.232 89.864 89.864-40.232 89.864-89.864 89.864z m0-314.525c-49.632 0-89.864-40.232-89.864-89.864 0-49.632 40.232-89.864 89.864-89.864s89.864 40.232 89.864 89.864c0 49.632-40.232 89.864-89.864 89.864z m0-314.525c-49.632 0-89.864-40.232-89.864-89.864s40.232-89.864 89.864-89.864 89.864 40.232 89.864 89.864-40.232 89.864-89.864 89.864z m224.66 494.254h539.186c24.816 0 44.932 20.116 44.932 44.932s-20.116 44.932-44.932 44.932H377.858c-24.816 0-44.932-20.116-44.932-44.932s20.116-44.932 44.932-44.932z" fill="#707070" p-id="6562"></path></svg>
+              </button>
+              <!--引用-->
+              <button :class="{ 'is-active': editor.isActive('blockquote') }"
+                      @click="editor.chain().focus().toggleBlockquote().run()">
+                <svg class="icon" height="20" p-id="5487" t="1731730910443"
+                     viewBox="0 0 1024 1024" width="20" xmlns="http://www.w3.org/2000/svg">
+                  <path
+                      d="M46.545455 907.450182v-814.545455h93.090909v814.545455z m218.763636-63.162182v-93.090909h557.242182v93.090909z m0-297.472v-93.090909h557.242182v93.090909z m0-297.472v-93.090909h708.747636v93.090909z"
+                      fill="#707070" p-id="5488"></path>
+                </svg>
+              </button>
+              <!--代码块-->
+              <button :class="{ 'is-active': editor.isActive('codeBlock') }"
+                      @click="editor.chain().focus().toggleCodeBlock().run()">
+                <svg class="icon" height="20" p-id="4264" t="1731730876352"
+                      viewBox="0 0 1024 1024" width="20" xmlns="http://www.w3.org/2000/svg">
+                  <path
+                      d="M714.24 296.533333h-94.933333l202.026666 202.453334-202.453333 202.453333h94.933333l202.453334-202.453333-202.026667-202.453334zM202.666667 498.986667l202.026666-202.453334h-94.933333l-202.026667 202.453334 198.826667 199.04 3.626667 3.413333h94.933333L202.666667 498.986667zM628.48 196.906667H558.933333l-169.386666 630.186666h69.546666v-2.56l51.413334-192 116.906666-431.573333z"
+                      fill="#707070" p-id="4265"></path>
+                </svg>
+              </button>
+              <!--段落-->
               <button :class="{ 'is-active': editor.isActive('paragraph') }"
                       @click="editor.chain().focus().setParagraph().run()">
                 <svg class="icon" height="20" p-id="27607" t="1731410529055"
@@ -539,7 +504,7 @@ const delCategory = async (id) => {
                         p-id="27608"></path>
                 </svg>
               </button>
-              <!--            一级标题-->
+              <!--一级标题-->
               <button :class="{ 'is-active': editor.isActive('heading', { level: 1 }) }"
                       @click="editor.chain().focus().toggleHeading({ level: 1 }).run()">
                 <svg class="icon" height="20" p-id="4273" t="1731409449388"
@@ -591,7 +556,7 @@ const delCategory = async (id) => {
                       fill="#707070" p-id="6736"></path>
                 </svg>
               </button>
-              <!--            六级标题-->
+              <!--六级标题-->
               <button :class="{ 'is-active': editor.isActive('heading', { level: 6 }) }"
                       @click="editor.chain().focus().toggleHeading({ level: 6 }).run()">
                 <svg class="icon" height="20" p-id="7757" viewBox="0 0 1024 1024"
@@ -601,7 +566,7 @@ const delCategory = async (id) => {
                       fill="#707070" p-id="7758"></path>
                 </svg>
               </button>
-              <!--            水平线-->
+              <!--水平线-->
               <button @click="editor.chain().focus().setHorizontalRule().run()">
                 <svg class="icon" height="20" p-id="25466" viewBox="0 0 1024 1024"
                      width="20" x="1731410327075" xmlns="http://www.w3.org/2000/svg">
@@ -620,7 +585,7 @@ const delCategory = async (id) => {
                       fill="#666666" p-id="14894"></path>
                 </svg>
               </button>
-              <!--            靠左-->
+              <!--靠左-->
               <button :class="{ 'is-active': editor.isActive({ textAlign: 'left' }) }"
                       @click="editor.chain().focus().setTextAlign('left').run()">
                 <svg class="icon" height="20" p-id="18220" viewBox="0 0 1024 1024"
@@ -630,7 +595,7 @@ const delCategory = async (id) => {
                       fill="#707070" p-id="18221"></path>
                 </svg>
               </button>
-              <!--            居中-->
+              <!--居中-->
               <button :class="{ 'is-active': editor.isActive({ textAlign: 'center' }) }"
                       @click="editor.chain().focus().setTextAlign('center').run()">
                 <svg class="icon" height="20" p-id="17198" viewBox="0 0 1024 1024"
@@ -640,7 +605,7 @@ const delCategory = async (id) => {
                       fill="#707070" p-id="17199"></path>
                 </svg>
               </button>
-              <!--            靠右-->
+              <!--靠右-->
               <button :class="{ 'is-active': editor.isActive({ textAlign: 'right' }) }"
                       @click="editor.chain().focus().setTextAlign('right').run()">
                 <svg class="icon" height="20" p-id="19241" viewBox="0 0 1024 1024"
@@ -650,7 +615,7 @@ const delCategory = async (id) => {
                       fill="#707070" p-id="19242"></path>
                 </svg>
               </button>
-              <!--            紫色-->
+              <!--紫色-->
               <button :class="{ 'is-active': editor.isActive('textStyle', { color: '#958DF1' }) }"
                       @click="editor.chain().focus().setColor('#958DF1').run()">
                 <svg class="icon" height="20" p-id="22661" viewBox="0 0 1024 1024"
@@ -660,7 +625,7 @@ const delCategory = async (id) => {
                       fill="#958df1" p-id="22662"></path>
                 </svg>
               </button>
-              <!--            黑色-->
+              <!--黑色-->
               <button :class="{ 'is-active': editor.isActive('textStyle', { color: 'rgba(0,0,0)' }) }"
                       @click="editor.chain().focus().setColor('#000000').run()">
                 <svg class="icon" height="20" p-id="22661" t="1731410268222"
@@ -683,8 +648,6 @@ const delCategory = async (id) => {
 </template>
 
 <style lang="scss" scoped>
-
-$text-color: #380e0e;
 @media (min-width: 800px) {
   .home-a {
     .page-title {
@@ -699,14 +662,14 @@ $text-color: #380e0e;
         color: #fff; /* 白色字体 */
         font-size: 35px;
         letter-spacing: 10px;
-        font-family: FZCSJW;
+        font-family: FZCSJW,serif;
         padding: 5px 15px;
         border-radius: 5px; /* 圆角效果 */
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* 轻微阴影 */
       }
 
       .text-block .ft {
-        font-family: FZCSFW;
+        font-family: FZCSFW,serif ;
       }
 
     }
@@ -890,21 +853,21 @@ $text-color: #380e0e;
                 height: 20px;
                 font-size: 16px;
                 font-weight: 600;
-                color: $text-color;
+                color: var(--theme-font-color);
               }
 
               .card-content {
                 font-weight: 100;
                 height: 20px;
                 font-size: 16px;
-                color: $text-color;
+                color: var(--theme-font-color);
               }
 
               .card-info {
                 font-weight: 100;
                 display: flex;
                 gap: 10px;
-                color: $text-color;
+                color: var(--theme-font-color);
                 font-size: 14px;
 
                 .icon {
@@ -926,7 +889,7 @@ $text-color: #380e0e;
                   display: block; /* 设置为块级元素 */
                   width: 1px;
                   height: 16px;
-                  background-color: $text-color;
+                  background-color: var(--theme-font-color);
                   position: absolute; /* 相对于 .text-block 定位 */
                   right: 0; /* 伪元素的位置 */
                   top: 50%; /* 垂直居中 */
@@ -1139,14 +1102,14 @@ $text-color: #380e0e;
             .content {
               height: 20px;
               font-size: 16px;
-              color: $text-color;
+              color: var(--theme-font-color);
             }
 
             .info {
 
               display: flex;
               gap: 10px;
-              color: $text-color;
+              color: var(--theme-font-color);
               font-size: 14px;
 
               .icon {
@@ -1163,7 +1126,7 @@ $text-color: #380e0e;
 
               .label::before {
                 content: "";
-                background-color: $text-color;
+                background-color: var(--theme-font-color);
                 padding: 0.5px 0.75px;
                 margin-right: 5px
               }

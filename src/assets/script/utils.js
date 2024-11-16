@@ -1,3 +1,5 @@
+import {ElMessage} from "element-plus";
+
 export const formattedTime = () => {
     const now = new Date();
     const year = now.getFullYear();
@@ -8,6 +10,14 @@ export const formattedTime = () => {
     const seconds = String(now.getSeconds()).padStart(2, '0');
     return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
 };
+// 消息展示
+export const showMessage = (message, type) => {
+    ElMessage({
+        type: type || 'success',  // Default to 'success' if no type is provided
+        message: message
+    });
+};
+
 // 截取第一个标签
 const TITLE = 30;
 const TEXTNUMS = 10;

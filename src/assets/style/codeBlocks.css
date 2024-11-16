@@ -1,0 +1,55 @@
+/* 代码块样式 */
+pre {
+    transition: .3s;
+    background-color: #f3f3f3;
+    padding: 20px;
+    border-radius: 8px;
+    overflow-x: auto;
+    font-family: 'JetBrainsMono', monospace;
+    font-size: 16px;
+    line-height: 1.6;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    margin: 10px 0;
+}
+
+code {
+    color: var(--theme-font-color);
+    padding: 2px 4px;
+    border-radius: 4px;
+    font-family: 'JetBrainsMono', monospace;
+    font-size: 90%;
+}
+
+pre:hover {
+    background-color: #e2e2e2;
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.1);
+}
+/*引用样式*/
+blockquote {
+    border-left: 3px solid var(--theme-color);
+    margin: 1.5rem 0;
+    padding-left: 1rem;
+}
+/*水平线*/
+hr {
+    border: none;
+    border-top: 1px solid #999;
+    cursor: pointer;
+    margin: 2rem 0;
+
+    &.ProseMirror-selectednode {
+        border-top: 1px solid var(--theme-color);
+    }
+}
+/*列表项*/
+ul,
+ol {
+    padding: 0 1rem;
+    margin: 1.25rem 1rem 1.25rem 0.4rem;
+    color: var(--theme-color);
+    li p {
+        color: var(--theme-font-color);
+        margin-top: 0.25em;
+        margin-bottom: 0.25em;
+    }
+}

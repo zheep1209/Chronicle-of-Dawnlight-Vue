@@ -1,0 +1,9 @@
+/* 隐藏滚动条 */
+body {
+    -ms-overflow-style: none; /* IE 和 Edge */
+    scrollbar-width: none; /* Firefox */
+}
+
+body::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+}

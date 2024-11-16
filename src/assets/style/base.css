@@ -1,108 +1,73 @@
+/* 字体设置 */
 @font-face {
-    font-family: 'FZCSJW'; /* 字体名称 */
-    src: url('../font/FZCSJW.TTF') format('truetype'); /* 字体文件路径 */
-    font-weight: normal;
-    font-style: normal;
-}
-@font-face {
-    font-family: 'FZCSFW'; /* 字体名称 */
-    src: url('../font/方正粗宋繁体.TTF') format('truetype'); /* 字体文件路径 */
+    font-family: 'FZCSJW';
+    src: url('../font/FZCSJW.TTF') format('truetype');
     font-weight: normal;
     font-style: normal;
 }
 
-/* Reset default margin and padding */
+@font-face {
+    font-family: 'FZCSFW';
+    src: url('../font/方正粗宋繁体.TTF') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'JetBrainsMono';
+    src: url('../font/JetBrainsMono-Medium.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+/* 全局样式重置 */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
-html{
-    background-color: #fffffa !important;
-}
-:root{
-    --theme-color: #a52a2a;
-    color-scheme: light;
-    --el-color-primary: #a52a2a !important;
-}
-.el-cascader .el-input__inner::placeholder {
-    color: #380e0e;
-}
-.el-menu-item:hover,.el-menu-item:focus{
-    backdrop-filter: blur(10px) !important;
-    background-color: rgba(255, 255, 255, 0.5) !important;
-}
-.el-overlay.is-message-box .el-overlay-message-box{
-    padding: 0 !important;
-}
-.el-menu{
-    background-color: rgba(255, 255, 255, 0) !important;
-}
-/*.is-focus ,*/
-.el-cascader, .el-tooltip__trigger, .el-tooltip__trigger, .el-input,.el-input--suffix, .el-input__wrapper{
-    font-size: 20px;
-    color: black !important;
-    background-color: rgba(255, 255, 255, 0) !important;
-    box-shadow: none !important;
-    padding: 0 !important;
-}
-.el-cascader{
-    width: 110px;
-}
-.el-input__inner{
-    color: black !important;
-}
-.el-cascader:hover{
-    background-color: rgba(255, 255, 255, 0) !important;
-    box-shadow: none !important;
-    padding: 0 !important;
-}
 
-.el-checkbox__input .is-focus{
-    width: 0 !important;
-}
-
-
-/* Ensure
- the html and body take full height */
 html, body {
     height: 100%;
     width: 100%;
-    font-family: Arial, sans-serif; /* 或其他你喜欢的字体 */
+    font-family: Arial, sans-serif;
     line-height: 1.6;
 }
 
-/* Remove bullet points and other default styles from lists */
-ul, ol {
-    list-style: none;
+html {
+    color-scheme: light;
+    color: var(--theme-font-color);
+    --theme-color: #a52a2a;
+    --theme-font-color:#380e0e;
+    --el-color-primary: #a52a2a !important;
 }
 
-/* Anchor tags reset */
+/* 去除默认样式 */
+/*ul, ol {*/
+/*    list-style: none;*/
+/*}*/
+
 a {
     text-decoration: none;
     color: inherit;
 }
 
-/* Image reset */
 img {
     max-width: 100%;
     display: block;
 }
 
-/* Button reset */
 button {
     border: none;
     background: none;
     cursor: pointer;
 }
 
-/* Table reset */
 table {
     border-collapse: collapse;
     width: 100%;
 }
 
-/* Remove default input and button styles */
 input, button, textarea {
     font-family: inherit;
     font-size: 100%;
@@ -111,19 +76,4 @@ input, button, textarea {
     border: none;
     outline: none;
     padding: 0;
-}
-
-/* Prevent scrollbars on overflow */
-html {
-    /*overflow: hidden;*/
-}
-
-/* Optional: Hide scrollbar but allow scroll */
-body {
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
-}
-
-body::-webkit-scrollbar {
-    display: none; /* Chrome, Safari, Opera */
 }
