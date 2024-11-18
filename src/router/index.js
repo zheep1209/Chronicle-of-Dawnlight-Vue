@@ -1,5 +1,4 @@
 import {createRouter, createWebHashHistory} from 'vue-router';
-import UserCenter from "@/views/UserCenter.vue";
 import useLoginStore from "@/stores/index.js";
 
 const router = createRouter({
@@ -25,9 +24,11 @@ const router = createRouter({
             path: '/bill', // 修改为相对路径
             name: 'bill', component: () => import('@/views/BillHome.vue')
         }, {
-            path: '/userCenter', name: 'userCenter', component: () => UserCenter
+            path: '/userCenter', name: 'userCenter', component: () => import('@/views/UserCenter.vue')
         }]
-    },]
+    }, {
+        name: '404', path: '/:catchAll(.*)', component: () => import(`@/views/404.vue`)
+    }]
 });
 // 路由守卫
 router.beforeEach((to, from, next) => {

@@ -48,7 +48,7 @@ const sanitizeContent = (content) => {
       </div>
     </div>
     <div class="page-content">
-      <PageMenu></PageMenu>
+      <PageMenu :user-data="userData"></PageMenu>
       <div class="articles">
         <router-link v-for="(item,index) in articleList.data" :key="index"
                      :style="{ animationDelay: `${index * 0.3}s` }"
@@ -69,7 +69,7 @@ const sanitizeContent = (content) => {
                       d="M96 512h256v160H96zM96 704h256v160H96zM384 512h256v160H384zM384 704h256v160H384zM672 512h256v160H672zM672 704h256v160H672z"
                       fill="#707070" p-id="6525"></path>
                 </svg>
-                {{item.createdAt.split('T')[0]}}
+                {{ item.createdAt.split('T')[0] }}
               </div>
               <div>
                 <svg class="icon" height="16" p-id="5410" t="1731633661746"
@@ -119,7 +119,7 @@ const sanitizeContent = (content) => {
       color: #fff; /* 白色字体 */
       font-size: 35px;
       letter-spacing: 10px;
-      font-family: FZCSJW,serif;
+      font-family: FZCSJW;
       padding: 5px 15px;
       border-radius: 5px; /* 圆角效果 */
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* 轻微阴影 */
@@ -171,7 +171,8 @@ const sanitizeContent = (content) => {
         animation-fill-mode: forwards;
 
         img {
-          height: 100%;
+          height: 100%; /* 保持原有的高度设置 */
+          min-height: 100%; /* 添加最小高度设置 */
           transition: .3s;
           width: 40%;
           object-fit: cover;

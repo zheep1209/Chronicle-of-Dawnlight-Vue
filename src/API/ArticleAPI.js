@@ -38,7 +38,7 @@ export const getArticle = (id) => {
 // GET
 // 根据用户id和分类ID进行权限检查，并返回文章列表
 export const getArticleByCategoryId = (id) => {
-    return get(`/articlesByCategoryId?categoryId=${id}`)
+    return get(`/byUserAndCategory?categoryId=${id}`)
 }
 //PUT
 // 根据文章ID列表进行批量修改文章分类ID

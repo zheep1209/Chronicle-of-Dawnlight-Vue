@@ -40,7 +40,7 @@ onMounted(async () => {
                height="38px" src="https://img.picgo.net/2024/10/25/d693c6f605470263c9e42740e8bed7d2909387c156c4a646.png"
                width="38px">
           <div class="info">
-            <div class="username">ZHEEP</div>
+            <div class="username">{{userData.username}}</div>
             <div class="identity">普通の魔法使い</div>
           </div>
         </div>

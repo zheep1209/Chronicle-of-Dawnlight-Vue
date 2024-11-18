@@ -1,25 +1,16 @@
 <script setup>
-import {ref, watch} from "vue";
+import {ref} from "vue";
 import router from "@/router/index.js";
 import useLoginStore from "@/stores/index.js";
 const store = useLoginStore()
-const props = defineProps({
-  userData: {
-    type: Object,
-    required: true
-  }
-});
-const style = ref(computeStyle(props.userData));
+const userData = useLoginStore().getUserData
+const style = ref(computeStyle(userData));
 
 function computeStyle(userData) {
   return userData.role === 1 ? "background-color: #2c006b" :
       (userData.role === 2 ? "background-color: #5ec069" :
           (userData.role === 3 ? "background-color: #817e00" : "background:#ff7089"));
 }
-
-watch(() => props.userData, (newUserData) => {
-  style.value = computeStyle(newUserData);
-}, {deep: true});
 const signOut = () => {
   store.clearSession()
   router.push("/login")
@@ -31,20 +22,20 @@ const inUserCenter = ()=>{
 
 <template>
   <div class="avatarBorder">
-    <img @click="inUserCenter" :src="props.userData.avatar?props.userData.avatar:''" alt="" class="avatar">
+    <img @click="inUserCenter" :src="userData.avatar?userData.avatar:''" alt="" class="avatar">
     <div class="userCard">
       <div class="userCard-info">
         <div class="header">
-          <div class="name">{{ props.userData.username }}</div>
+          <div class="name">{{ userData.username }}</div>
           <div :style="style" class="role">
             {{
-              props.userData.role === 1 ? "开发者" :
-                  (props.userData.role === 2 ? "管理员" :
-                      (props.userData.role === 3 ? "会　员" : "用　户"))
+              userData.role === 1 ? "开发者" :
+                  (userData.role === 2 ? "管理员" :
+                      (userData.role === 3 ? "会　员" : "用　户"))
             }}
           </div>
         </div>
-        <div class="email">{{ props.userData.email }}</div>
+        <div class="email">{{ userData.email }}</div>
         <div class="signOut" @click="signOut">登出</div>
       </div>
     </div>
