@@ -12,7 +12,7 @@ onMounted(async () => {
   userData.value = store.getUserData;
   try {
     articleList.value = await listPublicArticles();
-    // console.log(articleList.value)
+    console.log(articleList.value)
     if (articleList.value && articleList.value.code === 0) {
       ElMessage({
         type: 'error',
@@ -38,6 +38,7 @@ const sanitizeContent = (content) => {
 
   return result;
 }
+
 </script>
 
 <template>
@@ -54,9 +55,9 @@ const sanitizeContent = (content) => {
                      :style="{ animationDelay: `${index * 0.3}s` }"
                      :to="'/qwq/'+item.id"
                      class="article-items">
-          <img v-if="(index+1)%2===0" alt="" class="left-img"
-               src="https://images4.alphacoders.com/133/thumbbig-1337538.webp"
-               width="350px">
+          <img v-if="(index+1)%2===0" :src="item.touhouUrl" alt=""
+               class="left-img"
+               width="40%" height="250">
           <div class="article-items-info">
             <div class="article-items-status">
               <div>
@@ -89,9 +90,9 @@ const sanitizeContent = (content) => {
               {{ sanitizeContent(item.content) }}
             </div>
           </div>
-          <img v-if="(index+1)%2!==0" alt="" class="right-img"
-               src="https://images6.alphacoders.com/714/thumbbig-714226.webp"
-               width="350px">
+          <img v-if="(index+1)%2!==0" :src="item.touhouUrl" alt=""
+               class="right-img"
+               width="40%" height="250">
         </router-link>
       </div>
     </div>
@@ -119,7 +120,7 @@ const sanitizeContent = (content) => {
       color: #fff; /* 白色字体 */
       font-size: 35px;
       letter-spacing: 10px;
-      font-family: FZCSJW;
+      font-family: FZCSJW,serif;
       padding: 5px 15px;
       border-radius: 5px; /* 圆角效果 */
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* 轻微阴影 */
@@ -158,6 +159,8 @@ const sanitizeContent = (content) => {
       }
 
       .article-items {
+        overflow: hidden;
+        height: 250px;
         opacity: 0;
         animation: slideUp 0.5s ease;
         transition: .3s;
@@ -165,17 +168,16 @@ const sanitizeContent = (content) => {
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* 轻微阴影 */
         backdrop-filter: blur(10px); /* 添加背景磨砂效果 */
         background-color: rgba(255, 255, 255, 0.7); /* 半透明的白色背景 */
-        //background-color: #fff;
         margin-bottom: 40px;
         display: flex;
         animation-fill-mode: forwards;
+        align-items: center;
 
         img {
           height: 100%; /* 保持原有的高度设置 */
-          min-height: 100%; /* 添加最小高度设置 */
           transition: .3s;
-          width: 40%;
-          object-fit: cover;
+          min-width: 40%;
+          min-height: 100%; /* 添加最小高度设置 */
         }
 
         .left-img {
