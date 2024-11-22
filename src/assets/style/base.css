@@ -47,6 +47,11 @@ html {
 /*    list-style: none;*/
 /*}*/
 
+::selection {
+  background-color: rgba(165, 42, 42, 0.8); /* 选中文字的背景颜色 */
+  color: #fff;           /* 选中文字的文本颜色 */
+}
+
 a {
     text-decoration: none;
     color: inherit;
