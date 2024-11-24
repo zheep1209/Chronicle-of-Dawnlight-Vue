@@ -1,5 +1,63 @@
 import {ElMessage} from "element-plus";
+// 保留时分
+export function keepOnlyTime(isoDateTimeString) {
+    // 解析 ISO 格式的日期时间字符串
+    const date = new Date(isoDateTimeString);
 
+    // 获取小时和分钟
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+
+    // 返回格式化的时分字符串
+    return `${hours}:${minutes}`;
+}
+// 格式化日期
+export function convertDate(dateString) {
+    // 创建 Date 对象
+    const date = new Date(dateString);
+
+    // 获取年份
+    const year = date.getFullYear();
+
+    // 获取月份（注意月份是从0开始的，所以需要加1）
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+
+    // 获取日期
+    const day = String(date.getDate()).padStart(2, '0');
+
+    // 获取小时
+    const hours = String(date.getHours()).padStart(2, '0');
+
+    // 获取分钟
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+
+    // 获取秒
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+
+    // 拼接成目标格式
+    return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
+}
+// 还原格式化
+// 解析格式化后的日期字符串，返回原始的 Date 对象
+export function parseFormattedDate(formattedDateString) {
+    const [datePart, timePart] = formattedDateString.split('T');
+    const [year, month, day] = datePart.split('-').map(Number);
+    const [hours, minutes, seconds] = timePart.split(':').map(Number);
+
+    return new Date(year, month - 1, day, hours, minutes, seconds);
+}
+
+
+// 获取当前日期
+export const formattedDateDay = () => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+};
+
+// 获取当前详细时间
 export const formattedTime = () => {
     const now = new Date();
     const year = now.getFullYear();

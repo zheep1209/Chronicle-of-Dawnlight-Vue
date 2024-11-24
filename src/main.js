@@ -12,7 +12,7 @@ import axios from 'axios'
 import VueAxios from 'vue-axios'
 import { createPinia } from 'pinia'
 const app = createApp(App)
-
+import 'default-passive-events'
 app.use(VueAxios, axios)
 app.use(createPinia().use(piniaPluginPersist))
 app.use(router)

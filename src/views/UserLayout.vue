@@ -29,9 +29,9 @@ watch(() => router.currentRoute.value.path, (newPath) => {
 </script>
 
 <template>
-  <div class="home">
+  <div class="app">
     <div class="userCard">
-      <UserInfoCard :user-data="userData"></UserInfoCard>
+<!--      <UserInfoCard :user-data="userData"></UserInfoCard>-->
     </div>
     <div class="tarBar">
       <h3>Alba Log</h3>
@@ -56,9 +56,9 @@ watch(() => router.currentRoute.value.path, (newPath) => {
         </transition>
       </RouterView>
     </div>
-    <div class="bottom">
-      <div><span class="text-block">&copy;2024-2024</span><span>Saigyouji-Zheep</span></div>
-    </div>
+<!--    <div class="bottom">-->
+<!--      <div><span class="text-block">&copy;2024-2024</span><span>Saigyouji-Zheep</span></div>-->
+<!--    </div>-->
   </div>
 </template>
 
@@ -69,30 +69,7 @@ watch(() => router.currentRoute.value.path, (newPath) => {
 $primary-color: #fffffa;
 $shadow-color: #e5e5e5;
 
-//@media (max-width: 800px) {
-//  .home {
-//    height: auto !important;
-//    border-radius: 0 !important;
-//    margin-top: 0 !important;
-//  }
-//
-//  .tarBar {
-//    height: 100px !important;
-//
-//    .userCard {
-//      top: 0 !important;
-//      right: 0 !important;
-//    }
-//
-//    .el-menu {
-//      position: absolute;
-//      bottom: 0;
-//      //background-color: $primary-color !important;
-//    }
-//  }
-//}
-
-.home::before {
+.app::before {
   content: "";
   position: fixed;
   top: 0;
@@ -103,7 +80,7 @@ $shadow-color: #e5e5e5;
   z-index: 0; /* 确保蒙版在背景图之上 */
 }
 
-.home::after {
+.app::after {
   content: "";
   position: fixed;
   top: 0;
@@ -115,8 +92,8 @@ $shadow-color: #e5e5e5;
   z-index: -1; /* 确保背景图在所有内容之下 */
 }
 
-.home {
-  height: 100vh;
+.app {
+  height: calc(100vh - 60px);
   position: relative; /* 确保伪元素相对于 .home 定位 */
   .content-container {
     position: relative;
@@ -149,33 +126,33 @@ $shadow-color: #e5e5e5;
     }
   }
 
-  .bottom {
-    position: relative;
-    padding-top: 20px;
-    height: 10vh;
-    text-align: center;
-
-    span {
-      padding: 10px;
-    }
-
-    .text-block {
-      color: black;
-      position: relative; /* 确保伪元素相对于 .text-block 定位 */
-    }
-
-    .text-block::after {
-      content: "";
-      display: block; /* 设置为块级元素 */
-      width: 1px;
-      height: 16px;
-      background-color: #000;
-      position: absolute; /* 相对于 .text-block 定位 */
-      right: 0; /* 伪元素的位置 */
-      top: 50%; /* 垂直居中 */
-      transform: translateY(-50%); /* 垂直居中 */
-    }
-  }
+  //.bottom {
+  //  position: relative;
+  //  padding-top: 20px;
+  //  height: 10vh;
+  //  text-align: center;
+  //
+  //  span {
+  //    padding: 10px;
+  //  }
+  //
+  //  .text-block {
+  //    color: black;
+  //    position: relative; /* 确保伪元素相对于 .text-block 定位 */
+  //  }
+  //
+  //  .text-block::after {
+  //    content: "";
+  //    display: block; /* 设置为块级元素 */
+  //    width: 1px;
+  //    height: 16px;
+  //    background-color: #000;
+  //    position: absolute; /* 相对于 .text-block 定位 */
+  //    right: 0; /* 伪元素的位置 */
+  //    top: 50%; /* 垂直居中 */
+  //    transform: translateY(-50%); /* 垂直居中 */
+  //  }
+  //}
 }
 
 .fade-enter-active, .fade-leave-active {

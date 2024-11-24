@@ -29,6 +29,8 @@
     "@tiptap/vue-3": "^2.9.1",
     "axios": "^1.7.7",
     "crypto-js": "^4.2.0",
+    "d3": "^7.9.0",
+    "default-passive-events": "^2.0.0",
     "echarts": "^5.5.1",
     "element-plus": "^2.8.6",
     "element-tiptap": "^2.2.1",

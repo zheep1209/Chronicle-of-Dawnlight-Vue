@@ -37,3 +37,7 @@
 .el-checkbox__input .is-focus {
     width: 0 !important;
 }
+.el-radio-button__inner{
+    border: none !important;
+    border-radius: 5px !important;
+}

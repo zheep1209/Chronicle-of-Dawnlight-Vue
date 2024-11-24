@@ -682,12 +682,10 @@ const delCategory = async (id) => {
     }
 
     .page-content {
-      max-height: 85vh;
-      margin: 40px 40px 0 40px;
+      margin: 40px;
+      padding-bottom: 20px;
       display: flex;
       gap: 40px;
-      //overflow: hidden;
-      //border-radius: 20px;
 
       .preview {
         backdrop-filter: blur(10px); /* 添加背景磨砂效果 */
