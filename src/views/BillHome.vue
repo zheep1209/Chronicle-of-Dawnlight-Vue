@@ -1,21 +1,31 @@
 <script setup>
 import * as echarts from 'echarts';
-import {onMounted} from 'vue';
+import {onMounted, ref} from 'vue';
+import {createTr, deleteTr, getDailySummary, getMonthlySummary, updateTr} from "@/API/TranslationAPI.js";
+import {convertDate, formattedDateDay, keepOnlyTime, parseFormattedDate, showMessage} from "@/assets/script/utils.js";
+import {createCategory, getAllCategories} from "@/API/TransactionCategoryAPI.js";
 
-onMounted(() => {
+onMounted(async () => {
+  nowTime()
+  await today()
+  await getMonthlySummaryData()
+  await getCategories()
+  await echart()
+
+});
+const echart = async () => {
   const chartDom = document.getElementById('main');
   const myChart = echarts.init(chartDom);
   const option = {
     backgroundColor: 'rgba(255, 255, 255, 0)',
     darkMode: false,
     title: {
-      text: '账单统计图',
-      subtext: '如你所见',
+      text: '2024年 · 12月9日',
+      subtext: '开销',
       left: 'center'
     },
     textStyle: {
-      textBorderColor: 'transparent', // 取消白边
-      textBorderWidth: 0 // 取消边框宽度
+      fontWeight: 700,
     },
     tooltip: {
       trigger: 'item'
@@ -24,19 +34,14 @@ onMounted(() => {
       orient: 'vertical',
       left: 'left'
     },
+    color: ['#c87b7b', '#8f5e5e', '#f3c1a6', '#dac4c0', '#b09691', '#9d8782', '#e8a5a5', '#a88479'],
     series: [
       {
         name: 'Access From',
         type: 'pie',
         radius: ['30%', '70%'], // 内半径为30%，外半径为70%
         center: ['50%', '50%'], // 饼图居中显示
-        data: [
-          {value: 1048, name: '餐饮'},
-          {value: 321, name: '交通'},
-          {value: 1145, name: '其他'},
-          {value: 735, name: '娱乐'},
-          {value: 580, name: '医疗'},
-        ],
+        data: todayData.value.categoryTotals,
         emphasis: {
           itemStyle: {
             shadowBlur: 10,
@@ -46,35 +51,221 @@ onMounted(() => {
         }
       }
     ]
-  };
+  }
   option && myChart.setOption(option);
-});
+}
+// 获取交易分类
+let categories = ref([])
+const getCategories = async () => {
+  const result = await getAllCategories()
+  console.log("交易分类", result.data)
+  categories.value = await result.data
+  transaction.value.category = await categories.value[0].id
+}
+// 获取今日数据
+const selectMode = ref(1)
+let todayData = ref([])
+const today = async () => {
+  todayData.value = (await getDailySummary(date.value.year + '-' + date.value.month + '-' + date.value.day)).data
+  console.log("今日数据", todayData.value)
+}
+const dialogCreateTrVisible = ref(false)
+// 新增交易
+const transaction = ref({
+  date: "",
+  type: "",
+  categoryId: "",
+  amount: "",
+  description: "",
+})
+
+// 检查空值
+function checkEmptyValues(obj) {
+  let isEmpty = false;
+  for (let key in obj) {
+    if (obj[key] === "") {
+      console.log(key, "为空")
+      isEmpty = true
+    }
+  }
+  if (isEmpty) {
+    showMessage('请填写完整', 'error')
+  }
+  return isEmpty
+}
+
+// 提交交易
+const createTransaction = async () => {
+  if (!checkEmptyValues(transaction.value)) {
+    transaction.value.date = convertDate(transaction.value.date)
+    transaction.value.date = date.value.year + '-' + date.value.month + '-' + date.value.day + 'T' + convertDate(transaction.value.date).split('T')[1]
+    console.log(transaction.value.date)
+    const result = await createTr(transaction.value)
+    if (result.code === 1) {
+      showMessage('添加成功', 'success');
+      await today()
+      await getMonthlySummaryData()
+      await echart()
+    } else {
+      showMessage('添加错误' + result.msg, 'error');
+    }
+  }
+}
+// 删除交易
+const deleteTransaction = async (id) => {
+  const result = await deleteTr(id)
+  if (result.code === 1) {
+    showMessage('已删除', 'success');
+    await today()
+    await echart()
+  } else {
+    showMessage('删除失败', 'error');
+  }
+}
+// 修改交易
+const dialogUpdateTrVisible = ref(false)
+const openUpdateTr = async (index) => {
+  console.log(todayData.value.trList[index])
+  if (todayData.value.trList[index]) {
+    transaction.value = await todayData.value.trList[index]
+    transaction.value.date = parseFormattedDate(transaction.value.date)
+    transaction.value.amount = transaction.value.amount > 0 ? transaction.value.amount : (-transaction.value.amount)
+    transaction.value.categoryId = ''
+    dialogUpdateTrVisible.value = true
+  } else {
+    console.error('交易数据不存在', index)
+  }
+}
+const updateTransaction = async () => {
+  if (transaction.value && !checkEmptyValues(transaction.value)) {
+    transaction.value.date = convertDate(transaction.value.date)
+    transaction.value.date = date.value.year + '-' + date.value.month + '-' + date.value.day + 'T' + convertDate(transaction.value.date).split('T')[1]
+    const result = await updateTr(transaction.value)
+    if (result.code === 1) {
+      showMessage('修改成功', 'success');
+      await today()
+      await echart()
+    } else {
+      showMessage('修改错误' + result.msg, 'error');
+    }
+  } else {
+    console.error('交易数据为空或存在空值')
+  }
+}
+// 创建交易分类
+const dialogCreateTransactionCategory = ref(false)
+const category = ref("")
+const addCategory = async () => {
+  const result = await createCategory(category.value)
+  if (result.code === 1) {
+    showMessage('添加成功', 'success');
+  } else {
+    showMessage('添加错误' + result.msg, 'error');
+  }
+}
+// 获取当月数据
+const nowMonth = ref([])
+const getMonthlySummaryData = async () => {
+  const result = await getMonthlySummary(date.value.year + "-" + date.value.month)
+  nowMonth.value = await result.data
+  console.log("当月数据", result)
+}
+// 根据数值不同，呈现出不同颜色的深浅
+const getColor = (value) => {
+  if (value > 0) {
+    return 'green'
+  } else if (value < 0) {
+    return 'red'
+  } else {
+    return 'zero'
+  }
+}
+// 时间
+const date = ref(
+    {
+      year: '',
+      month: '',
+      day: ''
+    }
+)
+// 获取当前时间
+const nowTime = () => {
+  const nowDate = formattedDateDay()
+  console.log(nowDate)
+  date.value.year = nowDate.split('-')[0]
+  date.value.month = nowDate.split('-')[1]
+  date.value.day = nowDate.split('-')[2]
+};
+// 切换模式
+const D = async () => {
+  console.log(date)
+  selectMode.value = 1
+  await today()
+  await echart()
+}
+const toDay = (clicked_date) => {
+  date.value.year = clicked_date.split('-')[0]
+  date.value.month = clicked_date.split('-')[1]
+  date.value.day = clicked_date.split('-')[2]
+  console.log(date.value)
+  today()
+  selectMode.value = 1
+}
 </script>
 
 <template>
   <div class="app">
     <div class="info">
       <div class="page-menu">
-        <div>年</div>
-        <div>月</div>
-        <div>日</div>
+        <div @click="selectMode=3">Y</div>
+        <div @click="selectMode=2">M</div>
+        <div @click="D">D</div>
       </div>
-      <div class="title">
-        <div class="time">2024<b>年 · </b>12月9日</div>
-        <div class="text-block">今日收入：<span>0</span>，今日花费：<span>20</span>，当月预算还剩：<span>100</span></div>
+      <div v-if="selectMode===1" class="title">
+        <div class="time">{{ date.year }}<b>年 · </b>{{ date.month }}月{{ date.day }}日
+        </div>
+        <div v-if="todayData.total" class="text-block">
+          今日收入：<span>{{ todayData.total.total_income }}</span>，今日花费：<span>{{
+            -todayData.total.total_expense
+                                                                                  }}，总计：{{
+            todayData.total.total_income + todayData.total.total_expense
+                                                                                  }}</span>
+        </div>
       </div>
-      <div class="transaction">
-        <el-scrollbar height="62vh">
-          <div v-for="i in 20" class="transaction-item">
+      <div v-else-if="selectMode===2" class="title">
+        <div class="time">{{ date.year }}<b>年 · </b>{{ date.month }}月</div>
+        <div class="text-block">
+          本月收入：<span>{{ nowMonth.total.total_income }}</span>，本月花费：<span>{{
+            -nowMonth.total.total_expense
+                                                                                 }}</span>，总计：<span>{{
+            nowMonth.total.total
+                                                                                                      }}</span>
+        </div>
+      </div>
+      <div v-if="selectMode===1" class="transaction">
+        <div class="month"></div>
+        <el-scrollbar>
+          <div class="transaction-item">
+            <div class="transaction-item-crate" @click="dialogCreateTrVisible=true">
+              <svg id="mx_n_1732324295672" class="icon" height="25" p-id="5303"
+                   t="1732324295671" viewBox="0 0 1024 1024" width="25" xmlns="http://www.w3.org/2000/svg">
+                <path
+                    d="M469.333333 469.333333V170.666667h85.333334v298.666666h298.666666v85.333334h-298.666666v298.666666h-85.333334v-298.666666H170.666667v-85.333334h298.666666z"
+                    fill="#380e0e" p-id="5304"></path>
+              </svg>
+              <b>新增收支</b>
+            </div>
+          </div>
+          <div v-for="(tr,index) in todayData.trList" class="transaction-item">
             <div class="transaction-item-info">
-              <div class="mode">入</div>
-              <div class="amount">150<b> 元</b></div>
-              <div class="description">买石灰街车站的海鸥</div>
-              <div class="label">饮食</div>
-              <div class="time">21:27:42</div>
+              <div class="mode">{{ tr.type === "income" ? "收入" : "支出" }}</div>
+              <div class="amount">{{ tr.amount }}<b> 元</b></div>
+              <div class="description">{{ tr.description }}</div>
+              <div class="label">{{ tr.category }}</div>
+              <div class="time">{{ keepOnlyTime(tr.date) }}</div>
             </div>
             <div class="edit">
-              <a>
+              <a @click="openUpdateTr(index)">
                 <svg class="icon" height="23" p-id="7486" t="1732282838351"
                      version="1.1" viewBox="0 0 1024 1024" width="23" xmlns="http://www.w3.org/2000/svg">
                   <path
@@ -82,7 +273,7 @@ onMounted(() => {
                       fill="#999999" p-id="7487"></path>
                 </svg>
               </a>
-              <a>
+              <a @click="deleteTransaction(tr.id)">
                 <svg class="icon" height="20" p-id="8859" t="1732282990979"
                      version="1.1" viewBox="0 0 1024 1024" width="20" xmlns="http://www.w3.org/2000/svg">
                   <path
@@ -106,24 +297,200 @@ onMounted(() => {
           </div>
         </el-scrollbar>
       </div>
-    </div>
-    <div class="ECharts">
-      <div id="main">
-
+      <div v-else-if="selectMode===2" class="transaction-month">
+        <div v-for="(i,index) in nowMonth.trList" :class="getColor(i.net_income)"
+             class="day" @click="toDay(nowMonth.trList[index].transaction_date)">
+          <el-popover
+              :content='"总收入："+i.total_income+"，总消费："+i.total_expense'
+              :title="i.transaction_date"
+              :width="200"
+              placement="top-start"
+              trigger="hover">
+            <template #reference>
+              <div class="day-info" style="width: 100%;height: 100%">
+              </div>
+            </template>
+          </el-popover>
+        </div>
       </div>
     </div>
+    <div class="ECharts">
+      <div id="main"></div>
+    </div>
+    <!--    新增分类-->
+    <el-dialog id="form" v-model="dialogCreateTransactionCategory"
+               style="background: linear-gradient(to right, rgb(255, 230, 230), rgba(255, 255, 250, 1));"
+               title="新增分类"
+               width="500">
+      <div class="dialogCreateTransactionCategory">
+        <input v-model="category" placeholder="请输入分类名称" type="text"/>
+        <div class="dialogCreateTransactionCategoryButtons">
+          <a @click="addCategory">创建</a>
+          <a>取消</a>
+        </div>
+      </div>
+    </el-dialog>
+    <!--    新增交易-->
+    <el-dialog id="form" v-model="dialogCreateTrVisible"
+               style="background: linear-gradient(to right, rgb(255, 230, 230), rgba(255, 255, 250, 1));"
+               title="新增交易"
+               width="500">
+      <div class="dialog-content">
+        <el-time-picker v-model="transaction.date" placeholder="交易时间" size="small"/>
+        <div style=" height: 20px;display: flex;justify-content: space-between;padding: 0 10px;align-items: center">
+          <el-switch v-model="transaction.type" active-text="收入" active-value="income" checked
+                     inactive-text="支出" inactive-value="expense"/>
+          <a class="create-category" @click="dialogCreateTransactionCategory = true">创建分类</a></div>
+        <el-scrollbar height="40px" style="display: flex;align-items: center;padding: 10px;height: 40px">
+          <el-radio-group v-model="transaction.categoryId" size="large">
+            <el-radio-button v-for="item in categories" :label="item.name" :value="item.id" fill="#380E0EFF"
+                             size="small"/>
+          </el-radio-group>
+        </el-scrollbar>
+        <input v-model="transaction.amount" pattern="[0-9]*" placeholder="请输入金额" type="number"/>
+        <input v-model="transaction.description" maxlength="30" placeholder="请输入备注" type="text">
+        <div class="dialog-buttons">
+          <a @click="createTransaction()">提交</a>
+          <a>取消</a>
+        </div>
+      </div>
+    </el-dialog>
+    <!--    更新交易-->
+    <el-dialog id="form" v-model="dialogUpdateTrVisible"
+               style="background: linear-gradient(to right, rgb(255, 230, 230), rgba(255, 255, 250, 1));"
+               title="更新交易"
+               width="500">
+      <div class="dialog-content">
+        <el-time-picker v-model="transaction.date" placeholder="交易时间" size="small"/>
+        <div style=" height: 20px;display: flex;justify-content: space-between;padding: 0 10px;align-items: center">
+          <el-switch v-model="transaction.type" active-text="收入" active-value="income"
+                     inactive-text="支出" inactive-value="expense"/>
+          <a class="create-category" @click="dialogCreateTransactionCategory = true">创建分类</a></div>
+        <el-scrollbar height="40px" style="display: flex;align-items: center;padding: 10px;height: 40px">
+          <el-radio-group v-model="transaction.categoryId" size="large">
+            <el-radio-button v-for="item in categories" :label="item.name" :value="item.id" fill="#380E0EFF"
+                             size="small"/>
+          </el-radio-group>
+        </el-scrollbar>
+        <input v-model="transaction.amount" pattern="[0-9]*" placeholder="请输入金额" type="number"/>
+        <input v-model="transaction.description" maxlength="30" placeholder="请输入备注" type="text">
+        <div class="dialog-buttons">
+          <a @click="updateTransaction()">提交</a>
+          <a>取消</a>
+        </div>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <style lang="scss" scoped>
+.red {
+  background-color: var(--theme-color);
+}
+
+.green {
+  background-color: palegreen;
+}
+
+.zero {
+  background-color: #f0f0f0;
+}
+
 .app {
   width: 100%;
   height: calc(100vh - 60px);
   display: flex;
 
+  .dialogCreateTransactionCategory {
+    input {
+    }
+
+    .dialogCreateTransactionCategoryButtons {
+      display: flex;
+      justify-content: end;
+      gap: 20px;
+
+      a {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 0 5px;
+        border-radius: 5px;
+        font-size: 14px;
+      }
+
+      a:nth-child(2) {
+        border: 1px var(--theme-color) solid;
+      }
+
+      a:nth-child(1) {
+        background-color: var(--theme-color);
+        color: #ffffff;
+      }
+    }
+  }
+
+  .dialog-content {
+    height: 400px;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+
+    .create-category {
+      transition: .3s;
+      cursor: pointer;
+      border: var(--theme-color) 1px solid;
+      padding: 2px 5px;
+      border-radius: 20px;
+      color: var(--theme-font-color)
+    }
+
+    .create-category:hover {
+      border: none;
+      background-color: var(--theme-color);
+      color: #fffffa;
+    }
+
+    input {
+      border-bottom: 1px var(--theme-font-color) solid;
+      padding-bottom: 10px;
+    }
+
+    .el-radio-group {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .dialog-buttons {
+      display: flex;
+      justify-content: end;
+      gap: 20px;
+      height: 30px;
+
+      a {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 5px 10px;
+        border-radius: 15px;
+      }
+
+      a:nth-child(2) {
+        border: 1px var(--theme-color) solid;
+      }
+
+      a:nth-child(1) {
+        background-color: var(--theme-color);
+        color: #ffffff;
+      }
+    }
+  }
+
   .info {
     position: relative;
-    padding: 20px 100px 20px 50px;
+    padding: 20px 50px 20px 50px;
     width: 60%;
     backdrop-filter: blur(10px); /* 添加背景磨砂效果 */
     background-color: rgba(255, 255, 255, 0.6); /* 半透明的白色背景 */
@@ -174,6 +541,10 @@ onMounted(() => {
     }
 
     .transaction {
+      height: calc(100vh - 60px - 200px);
+      padding-bottom: 20px;
+      margin-right: 50px;
+
       .transaction-item {
         position: relative;
         transition: background 0.5s ease;
@@ -192,16 +563,31 @@ onMounted(() => {
         justify-content: space-between;
         overflow: hidden;
 
+        .transaction-item-crate {
+          width: 100%;
+          height: 80px;
+          z-index: 1;
+          cursor: pointer;
+          margin-left: 10px;
+          display: flex;
+          align-items: center;
+          gap: 30px;
+        }
+
         .transaction-item-info {
           z-index: 1;
           display: flex;
           align-items: center;
+          min-width: 70%;
 
           .mode {
             margin-left: 10px;
           }
 
           .amount {
+            display: flex;
+            gap: 10px;
+            align-items: center;
             margin: 0 20px;
             font-size: 20px;
           }
@@ -274,6 +660,28 @@ onMounted(() => {
           width: auto;
           opacity: 1;
         }
+      }
+    }
+
+    .transaction-month {
+      display: flex;
+      justify-content: start;
+      gap: 30px;
+      flex-wrap: wrap;
+
+      .day {
+        box-shadow: #a7a7a7 0 0 5px;
+        cursor: pointer;
+        margin-bottom: 20px;
+        width: 60px;
+        height: 60px;
+        //background-color: var(--theme-color);
+        border-radius: 10px;
+        font-size: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: #fffffa;
       }
     }
   }
