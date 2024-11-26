@@ -15,15 +15,37 @@ import {createCategory, getAllCategories} from "@/API/TransactionCategoryAPI.js"
 import usePageStore from "@/stores/page.js";
 
 onMounted(async () => {
-  nowTime()
-  await today()
-  await getMonthlySummaryData()
-  await getYearlySummaryData()
-  await getCategories()
-  watch([() => option_income.value, () => option_expense.value], () => {
-    echartsSum()  // 在依赖项更新后重新渲染图表
-  }, {immediate: true})  // immediate: true 确保在初始化时就调用一次
+  nowTime();
+  await today();
+  await getMonthlySummaryData();
+  await getYearlySummaryData();
+  await getCategories();
+  watch(
+      [() => option_income.value, () => option_expense.value],
+      () => {
+        // 处理 incomeEcharts
+        const incomeEchartsDom = document.getElementById('incomeEcharts');
+        if (incomeEchartsDom) {
+          const incomeEcharts = echarts.getInstanceByDom(incomeEchartsDom);
+          if (incomeEcharts) {
+            incomeEcharts.dispose();
+          }
+        }
+        // 处理 expenseEcharts
+        const expenseEchartsDom = document.getElementById('expenseEcharts');
+        if (expenseEchartsDom) {
+          const expenseEcharts = echarts.getInstanceByDom(expenseEchartsDom);
+          if (expenseEcharts) {
+            expenseEcharts.dispose();
+          }
+        }
+
+        echartsSum(); // 在依赖项更新后重新渲染图表
+      },
+      {immediate: true} // immediate: true 确保在初始化时就调用一次
+  );
 });
+
 const echartsSum = () => {
   incomeEcharts()
   expenseEcharts()
@@ -56,7 +78,9 @@ const generateOption = (title, data) => {
         type: 'pie',
         radius: ['30%', '70%'], // 内半径为30%，外半径为70%
         center: ['50%', '50%'], // 饼图居中显示
-        data: data,
+        data: data ? data : [
+          {value: 0, name: '暂无分类'}
+        ],
         emphasis: {
           itemStyle: {
             shadowBlur: 10,
@@ -79,8 +103,8 @@ const expenseEcharts = () => {
   const myChart = echarts.init(chartDom);
   option_expense.value && myChart.setOption(option_expense.value);
 }
-const option_income = computed(() => generateOption('收入', usePageStore().getModel === 1 ? todayData.value.breakdown.income : nowMonth.value.breakdown.income));
-const option_expense = computed(() => generateOption('支出', usePageStore().getModel === 1 ? todayData.value.breakdown.expense : nowMonth.value.breakdown.expense));
+const option_income = computed(() => generateOption('收入', usePageStore().getModel === 1 ? todayData.value.breakdown.income : usePageStore().getModel === 2 ? nowMonth.value.breakdown.income : nowYear.value.breakdown.income));
+const option_expense = computed(() => generateOption('支出', usePageStore().getModel === 1 ? todayData.value.breakdown.income : usePageStore().getModel === 2 ? nowMonth.value.breakdown.income : nowYear.value.breakdown.expense));
 // 获取交易分类
 const categories = ref([])
 const getCategories = async () => {
@@ -102,12 +126,13 @@ const getMonthlySummaryData = async () => {
   nowMonth.value = await result.data;
   // console.log("当月数据", nowMonth.value)
 }
+
 // 获取当年数据
 const nowYear = ref([])
 const getYearlySummaryData = async () => {
   const result = await getYearlySummary(date.value.year);
   nowYear.value = await result.data;
-  console.log("年数据", nowYear.value)
+  // console.log("年数据", nowYear.value)
 }
 // 新增交易
 const transaction = ref({
@@ -203,7 +228,7 @@ const addCategory = async () => {
 // 动态生成颜色映射函数c
 const colorScale = computed(() => {
   return d3.scaleLinear()
-      .domain([nowMonth.value.total.min_expense, 15, 20, nowMonth.value.total.max_expense])
+      .domain([nowMonth.value.total ? nowMonth.value.total.min_expense : 0, 15, 20, nowMonth.value.total ? nowMonth.value.total.max_expense : 100])
       .range(colorList[usePageStore().getColor])
       .interpolate(d3.interpolateHsl)// 使用 HSL 插值，增加色彩对比;
       .clamp(true)
@@ -262,6 +287,12 @@ const toDay = async (clicked_date) => {
   usePageStore().setPageModel(1)
   await today()
   // await echartsSum()
+}
+const toMonth = (year, month) => {
+  date.value.year = year
+  date.value.month = month
+  getMonthlySummaryData()
+  usePageStore().setPageModel(2)
 }
 const emptyDays = (year, month) => {
   const firstDay = new Date(year, month, 1).getDay(); // 获取每月第一天是星期几
@@ -376,7 +407,7 @@ const emptyDays = (year, month) => {
           </el-popover>
         </div>
         <div class="selectColor">
-          <div v-for="(colorList,index) in colorList" :style="{backgroundColor:color}"
+          <div v-for="(colorList,index) in colorList"
                class="color" @click="usePageStore().setColor(index)">
             <div :style="{background:colorList[0]}"></div>
             <div :style="{background:colorList[1]}"></div>
@@ -386,15 +417,18 @@ const emptyDays = (year, month) => {
         </div>
       </div>
       <div v-if="usePageStore().getModel===3" class="transaction-year">
-        <div v-for="(i,index) in nowYear.monthsTotal" class="months">
-          <div class="month-title">
-            <div>{{ i.year }}年</div>
-            <div>{{ i.month }}月</div>
-          </div>
-          <div class="month-body">
-            <div v-for="i in emptyDays(i.year,i.month-1)" class="month-body-none"></div>
-            <div v-for="(i,index) in nowYear.months[index]" :style="{backgroundColor:i.total_expense===0&&i.total_income===0?'#e5e5e5':getColor(-i.total_expense)}"
-                 class="month-body-item"></div>
+        <div class="months">
+          <div v-for="(i,index) in nowYear.monthsTotal" class="month" @click="toMonth(i.year,i.month)">
+            <div class="month-title">
+              <div>{{ i.year }}年</div>
+              <div>{{ i.month }}月</div>
+            </div>
+            <div class="month-body">
+              <div v-for="i in emptyDays(i.year,i.month-1)" class="month-body-none"></div>
+              <div v-for="(i,index) in nowYear.months[index]"
+                   :style="{backgroundColor:i.total_expense===0&&i.total_income===0?'#d0d0d0':getColor(-i.total_expense)}"
+                   class="month-body-item"></div>
+            </div>
           </div>
         </div>
       </div>
@@ -742,7 +776,6 @@ const emptyDays = (year, month) => {
       justify-content: start;
       gap: 30px;
       flex-wrap: wrap;
-      margin-top: 50px;
 
       .day {
         box-shadow: #a7a7a7 0 0 5px;
@@ -781,33 +814,42 @@ const emptyDays = (year, month) => {
     }
 
     .transaction-year {
-      display: flex;
-
       .months {
-        border-radius: 20px;
-        padding: 20px;
-        backdrop-filter: blur(10px);
-        background-color: rgba(255, 255, 255, 0.44); /* 半透明的白色背景 */
-        display: flex;
-        flex-direction: column;
+        -ms-overflow-style: none; /* IE and Edge */
+        scrollbar-width: none; /* Firefox */
+        overflow: scroll;
+        height: 550px;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
 
-        .month-title {
+        .month {
+          border-radius: 10px;
+          padding: 10px;
+          backdrop-filter: blur(10px);
+          background-color: rgba(255, 255, 255, 0.44); /* 半透明的白色背景 */
           display: flex;
-          gap: 20px;
-        }
+          flex-direction: column;
+          gap: 5px;
 
-        .month-body {
-          display: grid;
-          grid-template-columns: repeat(4, 1fr) repeat(3, 1fr);
-          grid-template-rows: auto;
-          gap: 10px;
-          flex-wrap: wrap;
+          .month-title {
+            display: flex;
+            gap: 10px;
+          }
 
-          .month-body-item {
-            border-radius: 5px;
-            width: 20px;
-            height: 20px;
-            background-color: var(--theme-color);
+          .month-body {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr) repeat(3, 1fr);
+            grid-template-rows: auto;
+            gap: 10px;
+            flex-wrap: wrap;
+
+            .month-body-item {
+              border-radius: 5px;
+              width: 20px;
+              height: 20px;
+              background-color: var(--theme-color);
+            }
           }
         }
       }
