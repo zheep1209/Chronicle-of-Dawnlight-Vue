@@ -1,7 +1,7 @@
 <script setup>
 import * as d3 from 'd3';
 import * as echarts from 'echarts';
-import {onMounted, ref, computed, watch} from 'vue';
+import {onMounted, ref, computed, watch,onUnmounted} from 'vue';
 import {
   createTr,
   deleteTr,
@@ -45,7 +45,9 @@ onMounted(async () => {
       {immediate: true} // immediate: true 确保在初始化时就调用一次
   );
 });
-
+onUnmounted(() => {
+  document.removeEventListener("keydown", saveKeyDown);
+});
 const echartsSum = () => {
   incomeEcharts()
   expenseEcharts()
@@ -104,12 +106,11 @@ const expenseEcharts = () => {
   option_expense.value && myChart.setOption(option_expense.value);
 }
 const option_income = computed(() => generateOption('收入', usePageStore().getModel === 1 ? todayData.value.breakdown.income : usePageStore().getModel === 2 ? nowMonth.value.breakdown.income : nowYear.value.breakdown.income));
-const option_expense = computed(() => generateOption('支出', usePageStore().getModel === 1 ? todayData.value.breakdown.income : usePageStore().getModel === 2 ? nowMonth.value.breakdown.income : nowYear.value.breakdown.expense));
+const option_expense = computed(() => generateOption('支出', usePageStore().getModel === 1 ? todayData.value.breakdown.expense : usePageStore().getModel === 2 ? nowMonth.value.breakdown.expense : nowYear.value.breakdown.expense));
 // 获取交易分类
 const categories = ref([])
 const getCategories = async () => {
   const result = await getAllCategories()
-  // console.log("交易分类", result.data)
   categories.value = await result.data
   transaction.value.category = await categories.value[0].id
 }
@@ -124,15 +125,12 @@ const nowMonth = ref([])
 const getMonthlySummaryData = async () => {
   const result = await getMonthlySummary(date.value.year + "-" + date.value.month);
   nowMonth.value = await result.data;
-  // console.log("当月数据", nowMonth.value)
 }
-
 // 获取当年数据
 const nowYear = ref([])
 const getYearlySummaryData = async () => {
   const result = await getYearlySummary(date.value.year);
   nowYear.value = await result.data;
-  // console.log("年数据", nowYear.value)
 }
 // 新增交易
 const transaction = ref({
@@ -167,7 +165,6 @@ const createTransaction = async () => {
       showMessage('添加成功', 'success');
       await today()
       await getMonthlySummaryData()
-      // await echartsSum()
     } else {
       showMessage('添加错误' + result.msg, 'error');
     }
@@ -179,7 +176,6 @@ const deleteTransaction = async (id) => {
   if (result.code === 1) {
     showMessage('已删除', 'success');
     await today()
-    // await echartsSum()
   } else {
     showMessage('删除失败', 'error');
   }
@@ -187,7 +183,6 @@ const deleteTransaction = async (id) => {
 // 修改交易
 const dialogUpdateTrVisible = ref(false)
 const openUpdateTr = async (index) => {
-  // console.log(todayData.value.trList[index])
   if (todayData.value.trList[index]) {
     transaction.value = await todayData.value.trList[index]
     transaction.value.date = parseFormattedDate(transaction.value.date)
@@ -293,6 +288,7 @@ const toMonth = (year, month) => {
   date.value.month = month
   getMonthlySummaryData()
   usePageStore().setPageModel(2)
+  today()
 }
 const emptyDays = (year, month) => {
   const firstDay = new Date(year, month, 1).getDay(); // 获取每月第一天是星期几
@@ -831,6 +827,7 @@ const emptyDays = (year, month) => {
           display: flex;
           flex-direction: column;
           gap: 5px;
+          justify-content: center;
 
           .month-title {
             display: flex;
@@ -839,10 +836,11 @@ const emptyDays = (year, month) => {
 
           .month-body {
             display: grid;
-            grid-template-columns: repeat(4, 1fr) repeat(3, 1fr);
+            grid-template-columns: repeat(7,1fr);
             grid-template-rows: auto;
             gap: 10px;
             flex-wrap: wrap;
+            place-items: center;
 
             .month-body-item {
               border-radius: 5px;

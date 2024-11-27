@@ -13,7 +13,7 @@ export const loginByEmail = (email, code) => {
 }
 //获取验证码
 export const getCode = (params) => {
-    return get("/getEmail", params)
+    return get(`/mail/sendMailCaptcha?to=${params}`)
 }
 
 //获取用户数据

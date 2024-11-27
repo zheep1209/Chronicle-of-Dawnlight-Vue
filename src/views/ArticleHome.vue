@@ -18,16 +18,15 @@ import {
   listArticles,
   updateArticle, updateCategoryByIds
 } from "@/API/ArticleAPI.js";
-
 import {createCategories, delCategories, getCategoriesList} from "@/API/categoryAPI.js";
-
+import {throttle} from "@/assets/script/throttle.js";
 let articleList = ref('')
 const html = ref('');
 //业务开始
 onMounted(async () => {
+  document.addEventListener("keydown", saveKeyDown);
   try {
     articleList.value = await listArticles();
-
     if (articleList.value && articleList.value.data && articleList.value.data.length > 0) {
       ArticleID.value = articleList.value.data[0].id;
       await selectArticle(ArticleID.value);
@@ -42,6 +41,7 @@ onMounted(async () => {
     // 获取全部标签列表
     await getCategories();
   } catch (error) {
+    // console.log(error);
     showMessage('发生未知错误，请刷新页面', 'error');
   }
 });
@@ -120,29 +120,47 @@ const data = ref({
   createdAt: "",
   updatedAt: ""
 })
+// 快捷键保存
+const saveKeyDown = (e) => {
+  if (e.key === "s" && (e.ctrlKey || e.metaKey)) {
+    e.preventDefault();
+    e.stopPropagation(); // 阻止冒泡
+    throttledSave();
+  }
+};
+
 const save = async () => {
   if (!ArticleID.value) {
     // 列表无数据，新增
     if (data.value.content === "") {
+      articleList.value = await listArticles();
     } else {
-
       const result = await createArticle(data.value)
-      articleList.value = await listArticles()
       if (result.code !== 1) {
         showMessage("保存失败，" + result.msg, "error")
       } else {
         ArticleID.value = result.data
         showMessage("已保存", "success")
+        if (currentID.value[0] === 0) {
+          articleList.value = await listArticles();
+        } else {
+          articleList.value = await getArticleByCategoryId(currentID.value[0] === 1 ? -1 : currentID.value[0])
+        }
       }
     }
   } else if (ArticleID.value) {
     const result = await updateArticle(ArticleID.value, data.value)
-    articleList.value = await listArticles()
+    if (currentID.value[0] === 0) {
+      articleList.value = await listArticles();
+    } else {
+      articleList.value = await getArticleByCategoryId(currentID.value[0] === 1 ? -1 : currentID.value[0])
+    }
     if (result.code === 1) {
       showMessage("已保存", "success")
     }
   }
 }
+const throttledSave = throttle(() => save(), 5000);
 // 新建笔记
 const add = () => {
   ArticleID.value = '';
@@ -152,13 +170,21 @@ const add = () => {
 }
 // 批量删除
 const deleteArticles = async () => {
+  dialogVisible.value = true
+}
+const deleteArticlesConfirm = async () => {
   const result = await deleteArticle(checkedArticles.value);
   if (result.code === 1) {
     showMessage("删除成功", "success")
-    articleList.value = await listArticles()
+    if (currentID.value[0] === 0) {
+      articleList.value = await listArticles();
+    } else {
+      articleList.value = await getArticleByCategoryId(currentID.value[0] === 1 ? -1 : currentID.value[0])
+    }
   } else {
     showMessage("删除失败" + result.msg, "error")
   }
+  dialogVisible.value = false
 }
 // 已选择的文章ID列表
 let checkedArticles = ref([])
@@ -177,7 +203,6 @@ const handleCheckedCitiesChange = (value) => {
 }
 // 当前选择的标签ID
 let currentID = ref('')
-
 // 获取与给定值匹配的标签
 function getLabelByValue(value) {
   if (!options.value) {
@@ -186,7 +211,6 @@ function getLabelByValue(value) {
   const matchedOption = options.value.find(option => option.value === value);
   return matchedOption ? matchedOption.label : null;
 }
-
 // 标签选择
 let options = ref()
 // 获取全部标签
@@ -238,10 +262,14 @@ const moveArticle = async (categoriesId) => {
     return;
   }
   // 业务！启动！
-  const result = await updateCategoryByIds(checkedArticles.value, categoriesId)
+  const result = await updateCategoryByIds(checkedArticles.value, categoriesId === 1 ? -1 : categoriesId)
   if (result.code === 1) {
     showMessage('移动成功', 'success');
-    articleList.value = await listArticles()
+    if (currentID.value[0] === 0) {
+      articleList.value = await listArticles();
+    } else {
+      articleList.value = await getArticleByCategoryId(currentID.value[0] === 1 ? -1 : currentID.value[0])
+    }
   } else {
     showMessage('移动失败', 'error');
   }
@@ -252,8 +280,9 @@ const articleByCategoryId = async () => {
     //全部笔记
     articleList.value = await listArticles()
   } else {
-    const result = await getArticleByCategoryId(currentID.value[0] === '' ? '' : currentID.value[0])
+    const result = await getArticleByCategoryId(currentID.value[0] === 1 ? -1 : currentID.value[0])
     if (result.code === 1) {
+      // 未分类
       articleList.value.data = result.data
     } else {
       showMessage('获取文章失败', 'error');
@@ -275,9 +304,21 @@ const delCategory = async (id) => {
     showMessage("删除失败" + "请将当前在此分类中的文章移出", 'error');
   }
 }
+const dialogVisible = ref(false);
 </script>
 <template>
   <div class="home-a">
+    <el-dialog
+        v-model="dialogVisible"
+        title="Tips"
+        width="500"
+    >
+      <span>确定要删除吗？</span>
+      <span slot="footer" class="dialog-footer">
+      <el-button @click="dialogVisible = false">取 消</el-button>
+      <el-button type="primary" @click="deleteArticlesConfirm()">确 定</el-button>
+    </span>
+    </el-dialog>
     <div class="page-title">
       <div class="text-block">
         <span class="ft">东</span>方<span style="color: red;">文</span>花帖
@@ -290,7 +331,7 @@ const delCategory = async (id) => {
             <div class="title">
               <el-cascader v-model="currentID" :options="options" placeholder="全部笔记"
                            @change="articleByCategoryId"/>
-              <div @click="addCategories">
+              <div style="cursor: pointer" @click="addCategories">
                 <svg class="icon" height="25px" p-id="4264"
                      viewBox="0 0 1024 1024" width="25px" xmlns="http://www.w3.org/2000/svg">
                   <path
@@ -311,7 +352,7 @@ const delCategory = async (id) => {
                     title="你确定要删除它吗?"
                     @confirm="delCategory(item.value)">
                   <template #reference>
-                    <div class="delItem">{{ item.label === "全部笔记" ? "" : item.label }}</div>
+                    <div class="delItem" style="cursor: pointer">{{ item.label === "全部笔记" ? "" : item.label }}</div>
                   </template>
                 </el-popconfirm>
                 <template #reference>
@@ -338,7 +379,7 @@ const delCategory = async (id) => {
             </div>
             <div class="button-group">
               <div v-if="isMore" class="more-button">
-                <div class="del" @click="deleteArticles">
+                <div class="del" style="cursor: pointer" @click="deleteArticles">
                   <svg class="icon" height="25" p-id="5223" t="1730088400772"
                        viewBox="0 0 1024 1024" width="25" xmlns="http://www.w3.org/2000/svg">
                     <path
@@ -358,7 +399,7 @@ const delCategory = async (id) => {
                     {{ item.value === 0 ? "" : item.label }}
                   </div>
                   <template #reference>
-                    <div class="move" @click="moveArticles">
+                    <div class="move" style="cursor: pointer" @click="moveArticles">
                       <svg class="icon" height="20" p-id="5122" t="1730088948026"
                            viewBox="0 0 1024 1024" width="20" xmlns="http://www.w3.org/2000/svg">
                         <path
@@ -375,10 +416,11 @@ const delCategory = async (id) => {
               </div>
               <div :style="isMore?'color: white;background-color: var(--theme-color);':'color:var(--theme-font-color)'"
                    class="more-select"
+                   style="cursor: pointer"
                    @click="isMore=!isMore">{{ isMore ? "取消" : "多选" }}
               </div>
-              <div v-if="!isMore" class="save" @click="save">保存</div>
-              <div v-if="!isMore" class="add" @click="add">new</div>
+              <div v-if="!isMore" class="save" style="cursor: pointer" @click="throttledSave()">保存</div>
+              <div v-if="!isMore" class="add" style="cursor: pointer" @click="add">new</div>
             </div>
           </div>
         </div>
@@ -388,7 +430,8 @@ const delCategory = async (id) => {
             <el-checkbox-group
                 v-model="checkedArticles"
                 @change="handleCheckedCitiesChange">
-              <div v-for="item in articleList.data" class="item" @click="selectArticle(item.id)">
+              <div v-for="item in articleList.data" class="item" style="cursor: pointer"
+                   @click="selectArticle(item.id)">
                 <el-checkbox v-if="isMore&&articleList.data" :key="item.id" :value="item.id">
                 </el-checkbox>
                 <div class="cardInfo">
@@ -645,7 +688,7 @@ const delCategory = async (id) => {
             </div>
           </div>
           <el-scrollbar height="76.5vh" max-height="100%">
-            <editor-content :editor="editor"/>
+            <editor-content :editor="editor" @keydown.enter.native="saveKeyDown"/>
           </el-scrollbar>
         </div>
       </div>
@@ -688,6 +731,7 @@ const delCategory = async (id) => {
       gap: 40px;
 
       .preview {
+        border-radius: 5px;
         backdrop-filter: blur(10px); /* 添加背景磨砂效果 */
         background-color: rgba(255, 255, 255, 0.4); /* 半透明的白色背景 */
         position: relative;

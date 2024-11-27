@@ -19,10 +19,10 @@ const getEmailCode = async () => {
 
   canGetCode.value = false;
   isFetching.value = true;
-  countdown.value = 30;
+  countdown.value = 60;
 
   try {
-    const result = await getCode({ email: props.email });
+    const result = await getCode(props.email);
     console.log(result);
 
     if (result.code === 0) {

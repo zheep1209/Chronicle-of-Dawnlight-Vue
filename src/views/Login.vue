@@ -120,7 +120,7 @@ const commitLogin = async () => {
           message: "登录成功",
           type: "success"
         })
-        localStorage.setItem('token', result.data.Token);
+        store.setToken(result.data.Token)
         await router.push('/article')
       }else {
         ElMessage({

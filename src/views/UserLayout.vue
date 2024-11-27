@@ -7,7 +7,7 @@ import {showMessage} from "@/assets/script/utils.js";
 
 const userAgent = navigator.userAgent;
 if (/Mobi|Android/i.test(userAgent)) {
-  showMessage("用电脑吧，我什么都原因做","error")
+  showMessage("用电脑吧，我什么都原因做", "error")
   router.push("/");
 }
 
@@ -18,7 +18,7 @@ onMounted(async () => {
   if (!store.isLoggedIn) {
     console.log("未登录")
   }
-    userData.value = store.getUserData
+  userData.value = store.getUserData
 });
 
 
@@ -31,7 +31,7 @@ watch(() => router.currentRoute.value.path, (newPath) => {
 <template>
   <div class="app">
     <div class="userCard">
-<!--      <UserInfoCard :user-data="userData"></UserInfoCard>-->
+      <UserInfoCard :user-data="userData"></UserInfoCard>
     </div>
     <div class="tarBar">
       <h3>Alba Log</h3>
@@ -52,20 +52,23 @@ watch(() => router.currentRoute.value.path, (newPath) => {
     <div class="content-container">
       <RouterView v-slot="{ Component }">
         <transition name="fade">
-          <component :is="Component"/>
+          <keep-alive>
+            <component :is="Component"/>
+          </keep-alive>
         </transition>
       </RouterView>
     </div>
-<!--    <div class="bottom">-->
-<!--      <div><span class="text-block">&copy;2024-2024</span><span>Saigyouji-Zheep</span></div>-->
-<!--    </div>-->
+    <!--    <div class="bottom">-->
+    <!--      <div><span class="text-block">&copy;2024-2024</span><span>Saigyouji-Zheep</span></div>-->
+    <!--    </div>-->
   </div>
 </template>
 
 <style lang="scss" scoped>
-@media (max-width: 800px){
+@media (max-width: 800px) {
 
 }
+
 $primary-color: #fffffa;
 $shadow-color: #e5e5e5;
 
@@ -76,7 +79,7 @@ $shadow-color: #e5e5e5;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(255, 255, 255, 0.4); /* 半透明的白色蒙版 */
+  background: rgba(255, 255, 255, 0); /* 半透明的白色蒙版 */
   z-index: 0; /* 确保蒙版在背景图之上 */
 }
 
@@ -87,7 +90,7 @@ $shadow-color: #e5e5e5;
   left: 0;
   width: 100%;
   height: 100%;
-  background: url("https://img.picgo.net/2024/11/12/77813431_p0b492e65b887511a3.jpg") no-repeat center center;
+  background: url("https://img.picgo.net/2024/11/27/7e361e78ac3b8de3e8c431272d9c5fa042fe19b07c571fe6.jpg") no-repeat bottom center;
   background-size: cover; /* 使背景图覆盖整个元素 */
   z-index: -1; /* 确保背景图在所有内容之下 */
 }

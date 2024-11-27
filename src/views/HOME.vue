@@ -4,9 +4,14 @@
       <div class="content">
         <!-- 文字和介绍 -->
         <div class="text-block">
-          <h1>Dawnlight Log</h1>
-          <h1>曦光录</h1>
-          <p>曦光下，梦随晨光</p>
+          <div class="title">
+            <div class="zh_title">曦光录</div>
+            <div class="en_title">
+              <div>Dawnlight</div>
+              <div>Log</div>
+            </div>
+          </div>
+          <div class="introduce">记账随心，笔记留痕</div>
         </div>
         <!-- 两个按钮 -->
         <div class="button-group">
@@ -54,20 +59,49 @@ $overlay-color: rgba(0, 0, 0, 0.5);
     z-index: 2; // 确保内容在蒙版之上
     text-align: left;
     box-sizing: border-box;
-    padding-left: 13%; // 默认左侧内边距
+    padding-left: 10%; // 默认左侧内边距
 
     .text-block {
       margin-bottom: 20px;
       color: white;
+      display: flex;
+      flex-direction: column;
+      //gap: 10px;
+      .title {
+        display: flex;
+        align-items: center;
+        gap: 1.05rem;
 
-      h1 {
-        font-size: 3.8em;
-        font-weight: 100;
+        .en_title {
+          height: 2rem;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          font-family: serif;
+          font-weight: 100;
+
+          div {
+            height: 40px;
+            display: flex;
+            align-items: center;
+            font-size: 2rem;
+          }
+        }
+
+        .zh_title {
+          font-family: serif;
+          color: #ffe7b0;
+          font-weight: 100;
+          font-size: 4.2rem;
+          line-height: 1.5;
+        }
       }
 
-      p {
-        font-size: 2em;
+      .introduce {
+        font-family: serif;
+        line-height: 1.5;
         font-weight: 100;
+        font-size: 2.2rem;
       }
     }
 
@@ -79,7 +113,7 @@ $overlay-color: rgba(0, 0, 0, 0.5);
       .btn {
         border-radius: 25px;
         color: white;
-        padding: 15px 35px;
+        padding: 10px 35px;
         border: 2px solid white;
         cursor: pointer;
         transition: 0.3s;
@@ -121,4 +155,7 @@ $overlay-color: rgba(0, 0, 0, 0.5);
     }
   }
 }
+
 </style>
+<script lang="ts" setup>
+</script>
