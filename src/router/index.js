@@ -25,6 +25,8 @@ const router = createRouter({
             name: 'bill', component: () => import('@/views/BillHome.vue')
         }, {
             path: '/userCenter', name: 'userCenter', component: () => import('@/views/UserCenter.vue')
+        }, {
+            path: '/Saigyouji', name: 'userCenter', component: () => import('@/views/NetworkDisk.vue')
         }]
     }, {
         name: '404', path: '/:catchAll(.*)', component: () => import(`@/views/404.vue`)

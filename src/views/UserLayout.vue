@@ -42,10 +42,13 @@ watch(() => router.currentRoute.value.path, (newPath) => {
           background-color="rgba(255, 255, 255, 0.4)"
           mode="horizontal">
         <el-menu-item index="/article">
-          <template #title>文章</template>
+          <template #title>文花帖</template>
         </el-menu-item>
         <el-menu-item index="/bill">
-          <template #title>账单</template>
+          <template #title>御札录</template>
+        </el-menu-item>
+        <el-menu-item v-if="userData.role===1" index="/Saigyouji">
+          <template #title>永云阁</template>
         </el-menu-item>
       </el-menu>
     </div>
@@ -158,13 +161,16 @@ $shadow-color: #e5e5e5;
   //}
 }
 
-.fade-enter-active, .fade-leave-active {
-  transition: opacity 0.5s; /* 调整过渡时间为0.5秒 */
+.fade-enter-active {
+  transition: opacity .5s ease-in-out;
 }
 
-.fade-enter, .fade-leave-to /* .fade-leave-active in <2.1.8 */
-{
-  opacity: 0; /* 初始状态为透明 */
+//.fade-leave-active {
+//  //transition: opacity .3s ease-in-out;
+//}
+
+.fade-enter-from, .fade-leave-to {
+  opacity: 0;
 }
 
 </style>

@@ -41,3 +41,8 @@
     border: none !important;
     border-radius: 5px !important;
 }
+.el-button{
+    --el-button-hover-bg-color:#fff !important;
+    --el-button-hover-border-color:#999 !important;
+    --el-button-hover-text-color:#333 !important;
+}

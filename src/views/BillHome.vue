@@ -1,7 +1,7 @@
 <script setup>
 import * as d3 from 'd3';
 import * as echarts from 'echarts';
-import {onMounted, ref, computed, watch,onUnmounted} from 'vue';
+import {onMounted, ref, computed, watch, onUnmounted} from 'vue';
 import {
   createTr,
   deleteTr,
@@ -358,7 +358,7 @@ const emptyDays = (year, month) => {
             <div class="edit">
               <a @click="openUpdateTr(index)">
                 <svg class="icon" height="23" p-id="7486" t="1732282838351"
-                     version="1.1" viewBox="0 0 1024 1024" width="23" xmlns="http://www.w3.org/2000/svg">
+                     viewBox="0 0 1024 1024" width="23" xmlns="http://www.w3.org/2000/svg">
                   <path
                       d="M857.058 979.307l-696.21 0c-64.08 0-116.035-51.981-116.035-116.097L44.813 166.55c0-64.123 52.716-121.611 116.803-121.611l467.187 0 0 58.397-467.18 0c-32.044 0-58.785 31.145-58.785 63.205l0 696.66c0 32.054 25.974 58.043 58.01 58.043l696.21 0c32.018 0 63.733-26.698 63.733-58.733l0-467.18 58.397 0 0 467.187c0.006 64.123-58.054 116.785-122.133 116.785L857.058 979.307zM510.287 697.977c-8.476 8.484-19.097 12.743-30.055 14.884L226.22 838.502c-28.588 13.257-51.486-12.364-40.954-40.971L310.838 543.33c2.13-10.958 6.371-21.58 14.865-30.066L776.958 61.682c22.659-22.65 59.387-22.65 82.046 0L961.553 164.31c22.66 22.66 22.66 59.44 0 82.1L510.29 697.974 510.287 697.977zM240.837 762.401c-6.637 13.396 6.177 27.131 20.46 20.493l156.863-95.003-82.382-82.444-94.94 156.952L240.837 762.401zM387.229 574.827l61.535 61.579c11.321 11.338-17.939-17.957 20.511 20.502l328.193-328.39L694.177 226.625 366.716 554.28c10.907 10.922 9.19 9.21 20.511 20.547L387.229 574.827zM900.025 184.852l-61.535-61.579c-11.32-11.356-29.693-11.356-41.024 0l-60.068 60.094L838.48 287.472l61.535-61.588c11.347-11.338 11.347-29.711 0.006-41.031L900.025 184.852z"
                       fill="#999999" p-id="7487"></path>
@@ -366,7 +366,7 @@ const emptyDays = (year, month) => {
               </a>
               <a @click="deleteTransaction(tr.id)">
                 <svg class="icon" height="20" p-id="8859" t="1732282990979"
-                     version="1.1" viewBox="0 0 1024 1024" width="20" xmlns="http://www.w3.org/2000/svg">
+                     viewBox="0 0 1024 1024" width="20" xmlns="http://www.w3.org/2000/svg">
                   <path
                       d="M992 204.8l-960 0C12.8 204.8 0 192 0 172.8s12.8-32 32-32l960 0c19.2 0 32 12.8 32 32S1011.2 204.8 992 204.8z"
                       fill="#999999" p-id="8860"></path>
@@ -423,7 +423,7 @@ const emptyDays = (year, month) => {
             </div>
             <div class="month-body">
               <div v-for="i in emptyDays(i.year,i.month-1)" class="month-body-none"></div>
-              <div v-for="(i,index) in nowYear.months[index]"
+              <div v-for="i in nowYear.months[index]"
                    :style="{backgroundColor:i.total_expense===0&&i.total_income===0?'#d0d0d0':getColor(-i.total_expense)}"
                    class="month-body-item"></div>
             </div>
@@ -508,8 +508,8 @@ const emptyDays = (year, month) => {
   overflow: hidden;
 
   .dialogCreateTransactionCategory {
-    input {
-    }
+    //input {
+    //}
 
     .dialogCreateTransactionCategoryButtons {
       display: flex;
@@ -711,8 +711,9 @@ const emptyDays = (year, month) => {
             color: #999;
           }
 
-          .label-box{
+          .label-box {
             width: 200px;
+
             .label {
               display: inline-block;
               margin-left: 40px;
@@ -773,6 +774,7 @@ const emptyDays = (year, month) => {
           width: auto;
           opacity: 1;
         }
+
         .time {
           width: 0;
           opacity: 0;
@@ -849,7 +851,7 @@ const emptyDays = (year, month) => {
 
           .month-body {
             display: grid;
-            grid-template-columns: repeat(7,1fr);
+            grid-template-columns: repeat(7, 1fr);
             grid-template-rows: auto;
             gap: 10px;
             flex-wrap: wrap;

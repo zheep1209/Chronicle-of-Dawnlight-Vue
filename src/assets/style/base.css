@@ -28,6 +28,7 @@
 }
 
 html, body {
+    scrollbar-width: none;
     height: 100%;
     width: 100%;
     font-family: Arial, sans-serif;
@@ -38,8 +39,9 @@ html {
     color-scheme: light;
     color: var(--theme-font-color);
     --theme-color: #a52a2a;
-    --theme-font-color:#380e0e;
+    --theme-font-color: #380e0e;
     --el-color-primary: #a52a2a !important;
+    --el-button-hover-bg-color: #fff !important;
 }
 
 /* 去除默认样式 */
@@ -48,8 +50,8 @@ html {
 /*}*/
 
 ::selection {
-  background-color: rgba(165, 42, 42, 0.8); /* 选中文字的背景颜色 */
-  color: #fff;           /* 选中文字的文本颜色 */
+    background-color: rgba(165, 42, 42, 0.8); /* 选中文字的背景颜色 */
+    color: #fff; /* 选中文字的文本颜色 */
 }
 
 a {

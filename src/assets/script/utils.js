@@ -1,5 +1,12 @@
 import {ElMessage} from "element-plus";
 // 保留时分
+export function formatFileSize(bytes) {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(2)} KB`;
+    if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+    return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
+}
+
 export function keepOnlyTime(isoDateTimeString) {
     // 解析 ISO 格式的日期时间字符串
     const date = new Date(isoDateTimeString);
