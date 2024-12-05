@@ -350,7 +350,9 @@ const emptyDays = (year, month) => {
               <div class="mode">{{ tr.type === "income" ? "收入" : "支出" }}</div>
               <div class="amount">{{ tr.amount }}<b> 元</b></div>
               <div class="description">{{ tr.description }}</div>
-              <div class="label">{{ tr.category }}</div>
+              <div class="label-box">
+                <div class="label">{{ tr.category }}</div>
+              </div>
               <div class="time">{{ keepOnlyTime(tr.date) }}</div>
             </div>
             <div class="edit">
@@ -689,30 +691,37 @@ const emptyDays = (year, month) => {
           }
 
           .amount {
+            justify-content: end;
             display: flex;
             gap: 10px;
             align-items: center;
             margin: 0 20px;
             font-size: 20px;
+            width: 80px;
           }
 
           .description {
-            text-align: center;
-            max-width: 35%;
-            min-width: 30%;
+            text-align: end;
+            width: 160px;
           }
 
           .time {
+            width: 100px;
+            text-align: right;
             color: #999;
           }
 
-          .label {
-            margin: 0 20px;
-            background-color: rgba(211, 211, 211, 0.29);
-            border-radius: 5px;
-            font-size: 14px;
-            color: #666;
-            padding: 2px 10px;
+          .label-box{
+            width: 200px;
+            .label {
+              display: inline-block;
+              margin-left: 40px;
+              background-color: rgba(211, 211, 211, 0.29);
+              border-radius: 5px;
+              font-size: 14px;
+              color: #666;
+              padding: 2px 10px;
+            }
           }
         }
 
@@ -763,6 +772,10 @@ const emptyDays = (year, month) => {
         .edit {
           width: auto;
           opacity: 1;
+        }
+        .time {
+          width: 0;
+          opacity: 0;
         }
       }
     }
