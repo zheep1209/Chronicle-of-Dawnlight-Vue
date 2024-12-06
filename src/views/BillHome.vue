@@ -389,9 +389,9 @@ const emptyDays = (year, month) => {
         </el-scrollbar>
       </div>
       <div v-if="usePageStore().getModel===2" class="transaction-month">
-        <div v-for="(i,index) in nowMonth.trList"
+        <div v-for="(i,monthIndex) in nowMonth.trList"
              :style="{backgroundColor:i.total_expense===0&&i.total_income===0?'#f5f5f5':getColor(-i.total_expense)}"
-             class="day" @click="toDay(nowMonth.trList[index].transaction_date)">
+             class="day" @click="toDay(nowMonth.trList[monthIndex].transaction_date)">
           <el-popover
               :content='"总收入："+i.total_income+"，总消费："+(-i.total_expense)'
               :title="i.transaction_date"
@@ -416,14 +416,14 @@ const emptyDays = (year, month) => {
       </div>
       <div v-if="usePageStore().getModel===3" class="transaction-year">
         <div class="months">
-          <div v-for="(i) in nowYear.monthsTotal" class="month" @click="toMonth(i.year,i.month)">
+          <div v-for="(i,monthIndex) in nowYear.monthsTotal" class="month" @click="toMonth(i.year,i.month)">
             <div class="month-title">
               <div>{{ i.year }}年</div>
               <div>{{ i.month }}月</div>
             </div>
             <div class="month-body">
               <div v-for="i in emptyDays(i.year,i.month-1)" class="month-body-none"></div>
-              <div v-for="i in nowYear.months[index]"
+              <div v-for="i in nowYear.months[monthIndex]"
                    :style="{backgroundColor:i.total_expense===0&&i.total_income===0?'#d0d0d0':getColor(-i.total_expense)}"
                    class="month-body-item"></div>
             </div>
