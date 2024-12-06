@@ -416,7 +416,7 @@ const emptyDays = (year, month) => {
       </div>
       <div v-if="usePageStore().getModel===3" class="transaction-year">
         <div class="months">
-          <div v-for="(i,index) in nowYear.monthsTotal" class="month" @click="toMonth(i.year,i.month)">
+          <div v-for="(i) in nowYear.monthsTotal" class="month" @click="toMonth(i.year,i.month)">
             <div class="month-title">
               <div>{{ i.year }}年</div>
               <div>{{ i.month }}月</div>
