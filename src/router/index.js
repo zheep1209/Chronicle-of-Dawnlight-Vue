@@ -47,17 +47,26 @@ router.beforeEach((to, from, next) => {
     if (isOpenRoute) {
         // 如果是无需认证的路由，直接导航
         next();
+    } else if (to.path === '/Saigyouji') {
+        // 针对 /Saigyouji 路由的特殊处理
+        const loginStore = useLoginStore();
+        if (loginStore.isLoggedIn && loginStore.getUserData.role < 4) {
+            // 如果已登录且角色权限小于 4，则放行
+            next();
+        } else {
+            // 否则，重定向到登录页
+            next({ name: 'login' });
+        }
     } else {
-        // 对于需要认证的路由，检查登录状态
+        // 对于其他需要认证的路由，检查登录状态
         if (!useLoginStore().isLoggedIn) {
             // 如果未登录，重定向到登录页
-            next({name: 'login'});
+            next({ name: 'login' });
         } else {
             // 已登录则继续导航
             next();
         }
     }
 });
-
 export default router;
        

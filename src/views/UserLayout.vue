@@ -47,7 +47,7 @@ watch(() => router.currentRoute.value.path, (newPath) => {
         <el-menu-item index="/bill">
           <template #title>御札录</template>
         </el-menu-item>
-        <el-menu-item v-if="userData.role===1" index="/Saigyouji">
+        <el-menu-item v-if="userData.role < 4" index="/Saigyouji">
           <template #title>永云阁</template>
         </el-menu-item>
       </el-menu>
