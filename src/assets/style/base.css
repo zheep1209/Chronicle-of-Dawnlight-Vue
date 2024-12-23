@@ -19,6 +19,14 @@
     font-weight: normal;
     font-style: normal;
 }
+@font-face {
+    font-family: 'LXG';
+    src: url('../font/LXGWWenKaiMonoLite-Light.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+
 
 /* 全局样式重置 */
 * {

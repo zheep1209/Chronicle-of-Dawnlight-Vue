@@ -20,6 +20,7 @@ import {
 } from "@/API/ArticleAPI.js";
 import {createCategories, delCategories, getCategoriesList} from "@/API/categoryAPI.js";
 import {throttle} from "@/assets/script/throttle.js";
+import router from "@/router/index.js";
 let articleList = ref('')
 const html = ref('');
 //业务开始
@@ -321,7 +322,7 @@ const dialogVisible = ref(false);
     </el-dialog>
     <div class="page-title">
       <div class="text-block">
-        <span class="ft">东</span>方<span style="color: red;">文</span>花帖
+        <span class="ft">东</span>方<span style="color: red;cursor: pointer" @click = "router.push('/about')">文</span>花帖
       </div>
     </div>
     <div class="page-content">
@@ -428,6 +429,8 @@ const dialogVisible = ref(false);
           <el-scrollbar>
             <div v-if="!articleList.data" class="tips">你还没有笔记哦</div>
             <el-checkbox-group
+                v-loading="!articleList.data"
+                element-loading-background="rgba(0,0,0,0)"
                 v-model="checkedArticles"
                 @change="handleCheckedCitiesChange">
               <div v-for="item in articleList.data" class="item" style="cursor: pointer"
@@ -759,6 +762,7 @@ const dialogVisible = ref(false);
               font-size: 20px;
               font-weight: 600;
 
+
               div {
                 display: flex;
                 justify-content: center;
@@ -897,8 +901,12 @@ const dialogVisible = ref(false);
 
             .cardInfo {
               padding: 10px 0;
+              width: 100%;
+              overflow: hidden;
 
               .card-title {
+                white-space: nowrap;
+                text-overflow: ellipsis;
                 height: 20px;
                 font-size: 16px;
                 font-weight: 600;

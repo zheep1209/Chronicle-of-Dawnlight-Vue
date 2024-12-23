@@ -1,14 +1,25 @@
 <script setup>
-import { onMounted } from 'vue';
-import { useRouter } from 'vue-router';
+import {onMounted, onUnmounted, ref} from 'vue';
+import {useRouter} from 'vue-router';
 
 const router = useRouter();
-
+let intervalId;
+const s = ref(5)
 onMounted(() => {
-  setTimeout(() => {
-    router.push('/wenwenNews'); // 假设要跳转到首页，可以根据需要修改路径
-  }, 5000); // 5秒后执行
+  intervalId = setInterval(() => {
+    s.value--;
+    if (s.value === 0) {
+      clearInterval(intervalId);
+      router.push('/wenwenNews');
+    }
+  }, 1000);
 });
+
+onUnmounted(() => {
+  // 确保在组件卸载时清除定时器
+  clearInterval(intervalId);
+});
+
 </script>
 
 <template>
@@ -16,7 +27,7 @@ onMounted(() => {
     <div class="tips">
       <span class="a">404</span>
       <span class="b">网页被幽幽子吃掉了</span>
-      <span class="c">5s自动返回</span>
+      <span class="c">{{ s }}s自动返回</span>
     </div>
   </div>
 </template>

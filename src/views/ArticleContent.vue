@@ -60,7 +60,6 @@ onMounted(async () => {
     max-width: 1350px;
     display: flex;
     position: relative;
-
     .article {
       width: 73%;
       border-radius: 5px;

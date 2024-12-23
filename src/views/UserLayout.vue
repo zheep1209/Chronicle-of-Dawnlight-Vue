@@ -93,7 +93,7 @@ $shadow-color: #e5e5e5;
   left: 0;
   width: 100%;
   height: 100%;
-  background: url("https://img.picgo.net/2024/11/27/7e361e78ac3b8de3e8c431272d9c5fa042fe19b07c571fe6.jpg") no-repeat bottom center;
+  background: url("https://zheep.oss-cn-beijing.aliyuncs.com/%E8%93%9D%E5%A4%A9%E6%96%87%E6%96%87.jpg") no-repeat bottom center;
   background-size: cover; /* 使背景图覆盖整个元素 */
   z-index: -1; /* 确保背景图在所有内容之下 */
 }

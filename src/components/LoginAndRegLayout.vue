@@ -6,7 +6,7 @@
     <div class="background">
       <div class="card">
         <div class="img">
-          <img src="https://img.picgo.net/2024/10/26/98765962_p0aec380ca1a79c131.png" alt="" />
+          <img src="https://zheep.oss-cn-beijing.aliyuncs.com/%E7%99%BB%E5%BD%95%E9%A1%B5%E7%81%B5%E6%A2%A6.png" alt="" />
         </div>
         <div class="content">
           <slot></slot>
@@ -17,7 +17,7 @@
 </template>
 
 <style scoped lang="scss">
-$bg-image: url('https://img.picgo.net/2024/10/26/f78607cf03042a307616296bf065ea3b80aa64710b6ddf67ed8d40ffd27535b9.jpg');
+$bg-image: url('https://zheep.oss-cn-beijing.aliyuncs.com/%E5%B9%BB%E6%83%B3%E4%B9%A1%E5%90%88%E7%85%A7.jpg');
 $overlay-color: rgba(255, 255, 255, 0.8);
 
 .home {

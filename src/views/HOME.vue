@@ -24,7 +24,7 @@
 </template>
 
 <style lang="scss" scoped>
-$bg-image: url('https://img.picgo.net/2024/10/26/-5384882fb6bac38c.jpg');
+$bg-image: url('https://zheep.oss-cn-beijing.aliyuncs.com/%E4%B8%BB%E9%A1%B5%E5%9B%BE%E7%89%87.jpg');
 $overlay-color: rgba(0, 0, 0, 0.5);
 
 .home {

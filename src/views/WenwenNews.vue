@@ -4,6 +4,7 @@ import {listPublicArticles} from "@/API/ArticleAPI.js";
 import {ElMessage} from "element-plus";
 import PageMenu from "@/components/PageMenu.vue";
 import useLoginStore from "@/stores/index.js";
+import router from "@/router/index.js";
 
 const store = useLoginStore()
 let articleList = ref('')
@@ -45,7 +46,7 @@ const sanitizeContent = (content) => {
   <div class="home-a">
     <div class="page-title">
       <div class="text-block">
-        <span class="ft">《文文</span>。<span style="color: red;">新</span>闻》
+        <span class="ft">《文文</span>。<span style="color: red;cursor: pointer" @click = "router.push('/about')">新</span>闻》
       </div>
     </div>
     <div class="page-content">

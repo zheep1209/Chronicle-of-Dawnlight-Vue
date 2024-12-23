@@ -22,10 +22,8 @@ instance.interceptors.request.use(config => {
     if (token) {
         config.headers['Authorization'] = token;
     }
-    // console.log('Request:', config); // 添加日志信息
     return config;
 }, error => {
-    // console.error('Request Error:', error); // 添加日志信息
     return Promise.reject(error);
 });
 

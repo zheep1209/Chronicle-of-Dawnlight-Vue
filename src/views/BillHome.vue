@@ -48,6 +48,7 @@ onMounted(async () => {
 onUnmounted(() => {
   document.removeEventListener("keydown", saveKeyDown);
 });
+
 const echartsSum = () => {
   incomeEcharts()
   expenseEcharts()
@@ -333,7 +334,7 @@ const emptyDays = (year, month) => {
       </div>
       <div v-if="usePageStore().getModel===1" class="transaction">
         <div class="month"></div>
-        <el-scrollbar height="64.5vh">
+        <el-scrollbar v-loading="!todayData.trList" element-loading-background="rgba(0, 0, 0, 0)" height="64.5vh">
           <div class="transaction-item">
             <div class="transaction-item-crate" @click="dialogCreateTrVisible=true">
               <svg id="mx_n_1732324295672" class="icon" height="25" p-id="5303"
@@ -388,7 +389,7 @@ const emptyDays = (year, month) => {
           </div>
         </el-scrollbar>
       </div>
-      <div v-if="usePageStore().getModel===2" class="transaction-month">
+      <div v-if="usePageStore().getModel===2" class="transaction-month" v-loading="!nowMonth.trList" element-loading-background="rgba(0, 0, 0, 0)">
         <div v-for="(i,monthIndex) in nowMonth.trList"
              :style="{backgroundColor:i.total_expense===0&&i.total_income===0?'#f5f5f5':getColor(-i.total_expense)}"
              class="day" @click="toDay(nowMonth.trList[monthIndex].transaction_date)">
@@ -404,7 +405,7 @@ const emptyDays = (year, month) => {
             </template>
           </el-popover>
         </div>
-        <div class="selectColor">
+        <div class="selectColor" v-if="nowMonth.trList">
           <div v-for="(colorList,index) in colorList"
                class="color" @click="usePageStore().setColor(index)">
             <div :style="{background:colorList[0]}"></div>
@@ -414,7 +415,7 @@ const emptyDays = (year, month) => {
           </div>
         </div>
       </div>
-      <div v-if="usePageStore().getModel===3" class="transaction-year">
+      <div v-if="usePageStore().getModel===3" class="transaction-year" v-loading="!nowYear.monthsTotal" element-loading-background="rgba(0, 0, 0, 0)">
         <div class="months">
           <div v-for="(i,monthIndex) in nowYear.monthsTotal" class="month" @click="toMonth(i.year,i.month)">
             <div class="month-title">
@@ -432,8 +433,8 @@ const emptyDays = (year, month) => {
       </div>
     </div>
     <div class="ECharts">
-      <div id="incomeEcharts"></div>
-      <div id="expenseEcharts"></div>
+      <div id="incomeEcharts"  v-loading="!(todayData.breakdown && nowYear.breakdown.income && nowMonth.breakdown.income)"  element-loading-background="rgba(0, 0, 0, 0)"></div>
+      <div id="expenseEcharts" v-loading="!(todayData.breakdown && nowYear.breakdown.income && nowMonth.breakdown.income)" element-loading-background="rgba(0, 0, 0, 0)"></div>
     </div>
     <!--    新增分类-->
     <el-dialog id="form" v-model="dialogCreateTransactionCategory"

@@ -69,7 +69,7 @@ const props = defineProps({
 <style scoped lang="scss">
 .page-menu {
   position: sticky;
-  top: 5px;
+  top:25px;
   margin: 0 1%;
   border-radius: 5px;
   padding: 20px;

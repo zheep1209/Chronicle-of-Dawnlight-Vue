@@ -6,6 +6,8 @@ const router = createRouter({
         path: '/', name: 'home', component: () => import('@/views/HOME.vue')
     }, {
         path: '/login', name: 'login', component: () => import('@/views/Login.vue')
+    },{
+        path: '/about', name: 'about', component: () => import('@/views/AboutPage.vue')
     }, {
         path: '/register', name: 'register', component: () => import('@/views/Register.vue')
     }, {
@@ -35,7 +37,7 @@ const router = createRouter({
 // 路由守卫
 router.beforeEach((to, from, next) => {
     // 定义无需认证的路由路径
-    const openRoutes = ['/', '/login', '/register', '/wenwenNews', '/qwq/:id'];
+    const openRoutes = ['/', '/login', '/register', '/wenwenNews', '/qwq/:id','/about'];
 
     // 检查目标路径是否在无需认证列表中
     const isOpenRoute = openRoutes.some((route) => {
