@@ -1,7 +1,7 @@
-import instance, {del, get, post} from '@/utils/request.js'
+import instance, {del, get} from '@/utils/request.js'
 
 
-export const upload = (data) => {
+export const upload = (data, onUploadProgress, cancelToken) => {
     const formData = new FormData();
     formData.append('file', data.file);
     formData.append('description', data.description);
@@ -10,7 +10,9 @@ export const upload = (data) => {
     return instance.post('/files/upload', formData, {
         headers: {
             'Content-Type': 'multipart/form-data' // 设置为 multipart/form-data
-        }
+        },
+        onUploadProgress,
+        cancelToken
     });
 };
 export const folderFiles = (id) => {

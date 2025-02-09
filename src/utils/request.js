@@ -8,7 +8,7 @@ import useLoginStore from "@/stores/index.js";
 // 2、创建axios实例，在其中设置公共参数
 export const instance = axios.create({
     baseURL: '/api', // 设置实际的API地址
-    timeout: 50000, // 增加超时时间
+    // timeout: 50000, // 增加超时时间
     headers: {
         'Content-Type': 'application/json' // 默认设置为JSON
     },

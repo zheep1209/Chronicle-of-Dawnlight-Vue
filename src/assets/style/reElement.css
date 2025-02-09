@@ -46,3 +46,6 @@
     --el-button-hover-border-color:#999 !important;
     --el-button-hover-text-color:#333 !important;
 }
+.el-popup-parent--hidden{
+    width: 100% !important;
+}

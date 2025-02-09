@@ -5,6 +5,9 @@ import {allFolder, create, deleteFolder, folderFolders} from "@/API/FolderAPI.js
 import {deleteFile, download, folderFiles, upload} from "@/API/FileAPI.js";
 import {formatFileSize, showMessage} from "@/assets/script/utils.js";
 import {ElMessage, ElMessageBox} from "element-plus";
+import {UploadFilled} from "@element-plus/icons-vue";
+import useLoginStore from "@/stores/index.js";
+import axios from "axios";
 
 onMounted(async () => {
   await getAllFolder()
@@ -70,19 +73,39 @@ const root = () => {
 }
 // 上传文件元素
 const df = ref('')
+// 创建取消令牌
+let cancelTokenSource = null;
 // 上传文件
-const uploadFile = async (e) => {
+const uploadFile = async (param) => {
+  console.log('上传文件' + param);
   const fileData = {
-    file: e.target.files[0],
+    file: param.file,
     description: '',
     folderId: currentFolder.value.id,
   };
+
+  // 创建取消令牌
+  cancelTokenSource = axios.CancelToken.source();
+
   try {
-    const res = await upload(fileData);
-    await getAllFolder()
+    const uploadProgressEvent = progressEvent => {
+      progressPercent.value = Math.floor((progressEvent.loaded * 100) / progressEvent.total);
+      if (progressPercent.value === 100) {
+        showMessage('上传成功', 'success');
+        fileList.value = [];
+        progressPercent.value = 0;
+      }
+    };
+
+    const res = await upload(fileData, uploadProgressEvent, cancelTokenSource.token);
+    await getAllFolder();
     console.log("上传文件成功：", res);
   } catch (error) {
-    console.error("上传文件失败：", error);
+    if (axios.isCancel(error)) {
+      console.log('上传已取消');
+    } else {
+      console.error("上传文件失败：", error);
+    }
   }
 };
 const position = ref({})
@@ -162,6 +185,16 @@ const delFile = async () => {
     console.error("删除文件失败：", error);
   }
 }
+const driver = ref(false)
+const fileList = ref([])
+const progressPercent = ref(0)
+const removeFIle = () => {
+  if (cancelTokenSource) {
+    cancelTokenSource.cancel('上传已取消');
+    progressPercent.value = 0;
+  }
+};
+
 </script>
 
 <template>
@@ -181,6 +214,27 @@ const delFile = async () => {
         </div>
       </template>
     </el-dialog>
+    <!--    下载抽屉-->
+    <el-drawer v-model="driver" direction="btt" size="40%">
+      <template #default>
+        <el-upload
+            :before-remove="removeFIle"
+            :file-list="fileList"
+            :http-request="uploadFile"
+            :limit="1"
+            action=""
+            class="upload-demo"
+            drag>
+          <el-icon class="el-icon--upload">
+            <upload-filled/>
+          </el-icon>
+          <div class="el-upload__text">
+            拖转上传 或 <em>点击上传</em>
+          </div>
+        </el-upload>
+        <el-progress :percentage="progressPercent" style="display: flex"/>
+      </template>
+    </el-drawer>
     <div class="app-content">
       <div style="display: flex;justify-content: space-between">
         <el-breadcrumb :separator-icon="RightRow">
@@ -209,12 +263,11 @@ const delFile = async () => {
           </svg>
           <svg class="icon" height="24" p-id="4298" style="cursor: pointer"
                t="1733459272166" viewBox="0 0 1024 1024" width="24" xmlns="http://www.w3.org/2000/svg"
-               @click="df.click()">
+               @click="driver = true">
             <path
                 d="M1024 693.248q0 25.6-8.704 48.128t-24.576 40.448-36.864 30.208-45.568 16.384l1.024 1.024-17.408 0-4.096 0-4.096 0-675.84 0q-5.12 1.024-16.384 1.024-39.936 0-74.752-15.36t-60.928-41.472-40.96-60.928-14.848-74.752 14.848-74.752 40.96-60.928 60.928-41.472 74.752-15.36l1.024 0q-1.024-8.192-1.024-15.36l0-16.384q0-72.704 27.648-137.216t75.776-112.128 112.128-75.264 136.704-27.648 137.216 27.648 112.64 75.264 75.776 112.128 27.648 137.216q0 37.888-8.192 74.24t-22.528 69.12q5.12-1.024 10.752-1.536t10.752-0.512q27.648 0 52.736 10.752t43.52 29.696 29.184 44.032 10.752 53.76zM665.6 571.392q20.48 0 26.624-4.608t-8.192-22.016q-14.336-18.432-31.744-48.128t-36.352-60.416-38.4-57.344-37.888-38.912q-18.432-13.312-27.136-14.336t-25.088 12.288q-18.432 15.36-35.84 38.912t-35.328 50.176-35.84 52.224-36.352 45.056q-18.432 18.432-13.312 32.768t25.6 14.336l16.384 0q9.216 0 19.968 0.512t20.992 0.512l17.408 0q14.336 1.024 18.432 9.728t4.096 24.064q0 17.408-0.512 30.72t-0.512 25.6-0.512 25.6-0.512 30.72q0 7.168 1.536 15.36t5.632 15.36 12.288 11.776 21.504 4.608l23.552 0q9.216 0 27.648 1.024 24.576 0 28.16-12.288t3.584-38.912q0-23.552 0.512-42.496t0.512-51.712q0-23.552 4.608-36.352t19.968-12.8q11.264 0 32.256-0.512t32.256-0.512z"
                 fill="#707070" p-id="4299"></path>
           </svg>
-
         </div>
         <input ref="df" style="display: none" type="file" @change="uploadFile($event)">
       </div>
